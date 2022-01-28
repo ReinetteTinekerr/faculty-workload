@@ -8,7 +8,7 @@ import type { NextPage } from "next";
 import { useContext, useEffect, useState } from "react";
 import { useAuthSession } from "utils/hooks";
 import { Tabs } from "antd";
-import { AuditOutlined, CheckOutlined, FormOutlined } from "@ant-design/icons";
+import { AuditOutlined, FormOutlined } from "@ant-design/icons";
 import WorkloadItem from "components/routes/faculty/WorkloadItem";
 
 import { WorkloadList } from "components/workload/WorkloadList";

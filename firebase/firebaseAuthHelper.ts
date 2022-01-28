@@ -5,9 +5,7 @@ import {
   signOut,
   User,
 } from "firebase/auth";
-import firebaseApp from "./clientApp";
-
-export const auth = getAuth(firebaseApp);
+import { auth } from "./clientApp";
 
 interface SignInProps {
   email: string;

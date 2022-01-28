@@ -1,5 +1,6 @@
 import { initializeApp, getApp, FirebaseOptions } from "firebase/app";
 import "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
 
 const config: FirebaseOptions = {
@@ -22,7 +23,7 @@ function createFirebaseApp(config: FirebaseOptions) {
 const firebaseApp = createFirebaseApp(config);
 
 export const db = getFirestore(firebaseApp);
-export default firebaseApp;
+export const auth = getAuth(firebaseApp);
 
 enableIndexedDbPersistence(db).catch((err) => {
   if (err.code == "failed-precondition") {

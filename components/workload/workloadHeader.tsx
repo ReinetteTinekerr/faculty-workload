@@ -17,7 +17,7 @@ type tabRouteOptions = {
 };
 
 function WorkloadHeader() {
-  const { user, loading, error, userRole, userData } = useAuthSession();
+  const [user, loading, error, userRole, userData] = useAuthSession();
 
   const router = useRouter();
   const tabRoutes: tabRouteOptions = {

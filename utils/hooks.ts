@@ -1,17 +1,14 @@
-// import { auth } from "../firebase/firebaseAuthHelper";
+import { auth } from "../firebase/clientApp";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { getUserProfileFromCacheElseServer } from "../firebase/firestoreQueries";
-import { getAuth } from "firebase/auth";
-import firebaseApp from "../firebase/clientApp";
 
 // const converter = {
 //   toFirestore: (data: UserProfileProps) => data,
 //   fromFirestore: (snap: FirebaseFirestore.QueryDocumentSnapshot) =>
 //     snap.data() as UserProfileProps
 // }
-const auth = getAuth(firebaseApp);
 
 export function useAuthSession() {
   const [user, loading, error] = useAuthState(auth);

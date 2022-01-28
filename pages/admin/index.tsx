@@ -112,11 +112,11 @@ const Admin: NextPage = () => {
                 }
                 key="2"
               >
-                {/* <Table
+                <Table
                   size="small"
                   columns={columns}
                   dataSource={firebaseUsers}
-                /> */}
+                />
               </TabPane>
               <TabPane
                 tab={
