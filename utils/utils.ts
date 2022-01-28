@@ -1,0 +1,53 @@
+import moment from "moment";
+
+export function getSchoolYear(
+  schoolYear: [string, string] | undefined
+): string | undefined {
+  if (schoolYear === undefined) return "";
+  return (
+    new Date(schoolYear[0]).getFullYear().toString() +
+    " - " +
+    new Date(schoolYear[1]).getFullYear().toString()
+  );
+}
+
+export function toTitleCase(str: string | undefined) {
+  if (str === undefined) return "";
+  return str.replace(/\w\S*/g, function (txt) {
+    return txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase();
+  });
+}
+
+export function getDate(timestamp: number) {
+  // return moment(new Date(timestamp.seconds * 1000)).format(
+  //   "MMMM Do YYYY, h:mm a"
+  // );
+  return moment(new Date(timestamp)).format("LLL");
+}
+
+export function getValidators(validatorsData: any, college: string) {
+  const validatorsWithoutDean = validatorsData.filter((member: any) => {
+    return member.position !== "Dean";
+  });
+
+  const dean = validatorsData.filter((member: any) => {
+    return (
+      member.position === "Dean" &&
+      member.college.toUpperCase() === college.toUpperCase()
+    );
+  });
+
+  const isuCommittee = validatorsData.filter((member: any) => {
+    return member.position === "University Workload Committee";
+  });
+
+  const validators = {
+    part1: [...dean, ...validatorsWithoutDean].sort(
+      (a, b) => a.positionIndex - b.positionIndex
+    ),
+    part2: isuCommittee,
+  };
+  console.log("validators", validators);
+
+  return JSON.parse(JSON.stringify(validators));
+}

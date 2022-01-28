@@ -1,0 +1,29 @@
+.antdTable table {
+  font-size: 9px;
+  border: 1px solid black;
+  background-color: white;
+  text-align: center;
+}
+
+.antdTable th {
+  border: 1px solid black;
+}
+.antdTable td {
+  border: 1px solid black;
+}
+
+.antdTable tbody > tr > td {
+  padding: 3px;
+}
+
+.antdTable thead > tr > th {
+  padding: 2px;
+  text-align: center;
+}
+/* .antdTable tr:nth-child(2n) td {
+  background-color: #000000;
+}
+
+.antdTable thead {
+  background-color: #000000;
+} */

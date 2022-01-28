@@ -3,14 +3,22 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && next export",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "12.0.7",
+    "@ant-design/icons": "^4.7.0",
+    "antd": "^4.18.2",
+    "firebase": "^9.6.3",
+    "firebase-admin": "^10.0.2",
+    "googleapis": "^92.0.0",
+    "moment": "^2.29.1",
+    "next": "latest",
     "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "react-dom": "17.0.2",
+    "react-firebase-hooks": "^4.0.2",
+    "react-to-print": "^2.14.3"
   },
   "devDependencies": {
     "@types/node": "17.0.7",
