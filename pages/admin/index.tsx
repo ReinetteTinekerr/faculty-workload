@@ -46,16 +46,16 @@ function callback(key: any) {
 }
 
 const Admin: NextPage = ({}) => {
-  const { user, loading, error, userRole, userData } = useAuthSession();
+  const [user, loading, error, userRole, userData] = useAuthSession();
   const { activeComponent } = useContext(ActiveComponentContext)!;
   const [firebaseUsers, setFirebaseUsers] = useState<any>(null);
   const [campusWorkloads, setCampusWorkloads] = useState<any>(null);
   const [validators, setValidators] = useState<any>(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !userData) return;
     getUsers().then((users) => setFirebaseUsers(users));
-  }, [user]);
+  }, [user, userData]);
 
   useEffect(() => {
     if (!user || !userData) return;
@@ -70,7 +70,12 @@ const Admin: NextPage = ({}) => {
     });
   }, [user, userData]);
 
-  if (loading || userRole === null || firebaseUsers === null) {
+  if (
+    loading ||
+    userRole === null ||
+    firebaseUsers === null ||
+    userData === null
+  ) {
     return <LoadingScreen />;
   }
   if (activeComponent === ActiveComponent.Profile) {
@@ -107,11 +112,11 @@ const Admin: NextPage = ({}) => {
                 }
                 key="2"
               >
-                <Table
+                {/* <Table
                   size="small"
                   columns={columns}
                   dataSource={firebaseUsers}
-                />
+                /> */}
               </TabPane>
               <TabPane
                 tab={

@@ -7,18 +7,10 @@ import { ActiveComponentContext } from "context/activeComponentContext";
 import type { NextPage } from "next";
 import { useContext, useEffect, useState } from "react";
 import { useAuthSession } from "utils/hooks";
-import { List, Tabs } from "antd";
+import { Tabs } from "antd";
 import { AuditOutlined, CheckOutlined, FormOutlined } from "@ant-design/icons";
 import WorkloadItem from "components/routes/faculty/WorkloadItem";
-import {
-  collection,
-  limit,
-  onSnapshot,
-  orderBy,
-  query,
-  where,
-} from "firebase/firestore";
-import { db } from "../../firebase/clientApp";
+
 import { WorkloadList } from "components/workload/WorkloadList";
 import {
   getFacultyWorkloads,
@@ -27,7 +19,7 @@ import {
 const { TabPane } = Tabs;
 
 const ValidateWorkloads: NextPage = ({}) => {
-  const { user, loading, error, userRole, userData } = useAuthSession();
+  const [user, loading, error, userRole, userData] = useAuthSession();
   const [facultyWorkloads, setFacultyWorkloads] = useState<any>(null);
   const [validatedWorkloads, setValidatedWorkloads] = useState<any>(null);
   const { activeComponent, setActiveComponent, setSelectedItem, selectedItem } =

@@ -62,5 +62,5 @@ export function useAuthSession() {
       });
     }
   }, [user, loading]);
-  return { user, loading, error, userRole, userData };
+  return [user, loading, error, userRole, userData];
 }
