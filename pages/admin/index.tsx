@@ -35,22 +35,20 @@ import {
 } from "../../firebase/firestoreQueries";
 import { WorkloadList } from "components/workload/WorkloadList";
 import { getValidators } from "utils/utils";
+import WorkloadItem from "components/routes/faculty/WorkloadItem";
 
 const { TabPane } = Tabs;
 
 const { Content } = Layout;
 const { Option } = Select;
 
-function callback(key: any) {
-  console.log(key);
-}
-
 const Admin: NextPage = () => {
   const [user, loading, error, userRole, userData] = useAuthSession();
-  const { activeComponent } = useContext(ActiveComponentContext)!;
+  const { activeComponent, selectedItem } = useContext(ActiveComponentContext)!;
   const [firebaseUsers, setFirebaseUsers] = useState<any>(null);
   const [campusWorkloads, setCampusWorkloads] = useState<any>(null);
   const [validators, setValidators] = useState<any>(null);
+  const [tabKey, setTabKey] = useState("1");
 
   useEffect(() => {
     if (!user || !userData) return;
@@ -82,6 +80,17 @@ const Admin: NextPage = () => {
     return <UserProfile userData={userData} />;
   }
 
+  if (activeComponent === ActiveComponent.WorkloadItem) {
+    return (
+      <WorkloadItem
+        workload={selectedItem!}
+        role={userRole}
+        positionIndex={userData.positionIndex}
+        campusId={userData.campusId}
+      />
+    );
+  }
+
   return (
     <>
       <Head>
@@ -93,7 +102,11 @@ const Admin: NextPage = () => {
       <WorkloadLayout>
         <Layout style={{ width: "90%", margin: "auto", background: "#fff" }}>
           <Content style={{ overflow: "auto" }}>
-            <Tabs defaultActiveKey="1" onChange={callback} centered>
+            <Tabs
+              defaultActiveKey={tabKey}
+              onChange={(key) => setTabKey(key)}
+              centered
+            >
               <TabPane
                 tab={
                   <span>
