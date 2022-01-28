@@ -1,13 +1,10 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import LoadingScreen from "components/layout/loadingScreen";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "../firebase/clientApp";
-// import { useAuthSession } from "utils/hooks";
+import { useAuthSession } from "utils/hooks";
 
 const Home: NextPage = () => {
-  // const [user, loading, error] = useAuthSession();
-  const [user, loading, error] = useAuthState(auth);
+  const [user, loading, error] = useAuthSession();
 
   return (
     <div>
