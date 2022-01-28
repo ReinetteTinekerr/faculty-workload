@@ -7,7 +7,7 @@ import { useAuthSession } from "utils/hooks";
 interface indexProps {}
 
 const Home: NextPage = ({}) => {
-  const { user, loading, error } = useAuthSession();
+  const [user, loading, error] = useAuthSession();
 
   return (
     <div>
