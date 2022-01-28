@@ -5,9 +5,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase/clientApp";
 // import { useAuthSession } from "utils/hooks";
 
-interface indexProps {}
-
-const Home: NextPage = ({}) => {
+const Home: NextPage = () => {
   // const [user, loading, error] = useAuthSession();
   const [user, loading, error] = useAuthState(auth);
 
