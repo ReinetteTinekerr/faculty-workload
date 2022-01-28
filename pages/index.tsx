@@ -1,13 +1,15 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import LoadingScreen from "components/layout/loadingScreen";
-import { useRouter } from "next/router";
-import { useAuthSession } from "utils/hooks";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "../firebase/clientApp";
+// import { useAuthSession } from "utils/hooks";
 
 interface indexProps {}
 
 const Home: NextPage = ({}) => {
-  const [user, loading, error] = useAuthSession();
+  // const [user, loading, error] = useAuthSession();
+  const [user, loading, error] = useAuthState(auth);
 
   return (
     <div>
