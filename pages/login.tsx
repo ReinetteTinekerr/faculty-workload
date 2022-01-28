@@ -10,7 +10,7 @@ const { Title } = Typography;
 const { Content } = Layout;
 
 const Login = () => {
-  const { user, loading, error } = useAuthSession();
+  const [user, loading, error] = useAuthSession();
 
   return (
     <>
