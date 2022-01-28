@@ -5,11 +5,12 @@ import { LoginForm } from "components/loginForm";
 import { login } from "../firebase/firebaseAuthHelper";
 import { useAuthSession } from "utils/hooks";
 import WorkloadLayout from "components/layout/WorkloadLayout";
+import { NextPage } from "next";
 
 const { Title } = Typography;
 const { Content } = Layout;
 
-const Login = () => {
+const Login: NextPage = () => {
   const [user, loading, error] = useAuthSession();
 
   return (

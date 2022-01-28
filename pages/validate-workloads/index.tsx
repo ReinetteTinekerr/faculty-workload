@@ -18,7 +18,7 @@ import {
 } from "../../firebase/firestoreQueries";
 const { TabPane } = Tabs;
 
-const ValidateWorkloads: NextPage = ({}) => {
+const ValidateWorkloads: NextPage = () => {
   const [user, loading, error, userRole, userData] = useAuthSession();
   const [facultyWorkloads, setFacultyWorkloads] = useState<any>(null);
   const [validatedWorkloads, setValidatedWorkloads] = useState<any>(null);

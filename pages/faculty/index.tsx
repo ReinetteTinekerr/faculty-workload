@@ -14,11 +14,7 @@ import {
   getUserWorkloadsInProgress,
 } from "../../firebase/firestoreQueries";
 
-interface Props {
-  workloadList: any;
-}
-
-const Faculty: NextPage<Props> = () => {
+const Faculty: NextPage = () => {
   const [user, loading, error, userRole, userData] = useAuthSession();
   const { activeComponent, selectedItem } = useContext(ActiveComponentContext)!;
   const [workloads, setWorkloads] = useState<any>(null);

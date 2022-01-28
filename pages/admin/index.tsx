@@ -45,7 +45,7 @@ function callback(key: any) {
   console.log(key);
 }
 
-const Admin: NextPage = ({}) => {
+const Admin: NextPage = () => {
   const [user, loading, error, userRole, userData] = useAuthSession();
   const { activeComponent } = useContext(ActiveComponentContext)!;
   const [firebaseUsers, setFirebaseUsers] = useState<any>(null);
