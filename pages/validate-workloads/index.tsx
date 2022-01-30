@@ -16,6 +16,7 @@ import {
   getFacultyWorkloads,
   getValidatedWorkloads,
 } from "../../firebase/firestoreQueries";
+import Head from "next/head";
 const { TabPane } = Tabs;
 
 const ValidateWorkloads: NextPage = () => {
@@ -66,36 +67,46 @@ const ValidateWorkloads: NextPage = () => {
     );
   }
   return (
-    <WorkloadLayout headerTitle="ISU Validator">
-      <Layout>
-        <Content
-          style={{ margin: "0px 10px", background: "#fff", overflow: "auto" }}
-        >
-          <Tabs defaultActiveKey="1" onChange={() => {}} centered>
-            <TabPane
-              tab={
-                <span>
-                  <FormOutlined /> Pending
-                </span>
-              }
-              key="1"
-            >
-              <WorkloadList workloads={facultyWorkloads} />
-            </TabPane>
-            <TabPane
-              tab={
-                <span>
-                  <AuditOutlined /> Validated
-                </span>
-              }
-              key="2"
-            >
-              <WorkloadList workloads={validatedWorkloads} />
-            </TabPane>
-          </Tabs>
-        </Content>
-      </Layout>
-    </WorkloadLayout>
+    <>
+      <Head>
+        <title>Faculty Workload</title>
+        <meta
+          name="description"
+          content="This project was developed by BSCS Students from ISU Echague"
+        />
+        <link rel="icon" href="/isu-logo.ico" />
+      </Head>
+      <WorkloadLayout headerTitle="ISU Validator">
+        <Layout>
+          <Content
+            style={{ margin: "0px 10px", background: "#fff", overflow: "auto" }}
+          >
+            <Tabs defaultActiveKey="1" onChange={() => {}} centered>
+              <TabPane
+                tab={
+                  <span>
+                    <FormOutlined /> Pending
+                  </span>
+                }
+                key="1"
+              >
+                <WorkloadList workloads={facultyWorkloads} />
+              </TabPane>
+              <TabPane
+                tab={
+                  <span>
+                    <AuditOutlined /> Validated
+                  </span>
+                }
+                key="2"
+              >
+                <WorkloadList workloads={validatedWorkloads} />
+              </TabPane>
+            </Tabs>
+          </Content>
+        </Layout>
+      </WorkloadLayout>
+    </>
   );
 };
 

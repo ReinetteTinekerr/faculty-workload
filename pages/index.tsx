@@ -12,9 +12,9 @@ const Home: NextPage = () => {
         <title>Faculty Workload</title>
         <meta
           name="description"
-          content="This project was developed by ISU Echague BSCS Students"
+          content="This project was developed by BSCS Students from ISU Echague"
         />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/isu-logo.ico" />
       </Head>
       <LoadingScreen />
     </div>
