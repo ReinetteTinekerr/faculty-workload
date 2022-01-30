@@ -82,6 +82,7 @@ export interface UserProfileProps {
     role: string;
     uid: string;
     username: string;
+    signature: string;
   };
 }
 

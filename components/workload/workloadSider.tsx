@@ -28,7 +28,9 @@ export function StatusSider() {
 
 export function ProgressSider({ validators, validationProgress }: any) {
   const [collapsed, setCollapsed] = useState(true);
-  const joinValidators = [validators.part1, validators.part2];
+  const arrayValidators = Object.values(validators).sort(
+    (a: any, b: any) => a.positionIndex - b.positionIndex
+  );
   return (
     <Sider
       trigger={null}
@@ -59,7 +61,7 @@ export function ProgressSider({ validators, validationProgress }: any) {
         Workload Validators
       </Tag>
       <Steps direction="vertical" size="small" current={1}>
-        {validators.part1.map((validator: any, index: number) => {
+        {arrayValidators.map((validator: any, index: number) => {
           let status = "";
           let icon = null;
 

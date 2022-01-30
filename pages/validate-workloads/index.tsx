@@ -25,8 +25,6 @@ const ValidateWorkloads: NextPage = () => {
   const { activeComponent, setActiveComponent, setSelectedItem, selectedItem } =
     useContext(ActiveComponentContext)!;
 
-  console.log("faculty", facultyWorkloads);
-
   useEffect(() => {
     if (!userData || !user) return;
     getFacultyWorkloads(
@@ -68,7 +66,7 @@ const ValidateWorkloads: NextPage = () => {
     );
   }
   return (
-    <WorkloadLayout>
+    <WorkloadLayout headerTitle="ISU Validator">
       <Layout>
         <Content
           style={{ margin: "0px 10px", background: "#fff", overflow: "auto" }}

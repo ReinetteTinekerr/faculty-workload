@@ -8,7 +8,6 @@ import {
   Table,
   Image,
   message,
-  Space,
 } from "antd";
 import Text from "antd/lib/typography/Text";
 import WorkloadHeader from "components/workload/workloadHeader";
@@ -16,22 +15,23 @@ import { graduateColumns, undergraduateColumns } from "data/data";
 
 import styles from "styles/ID.module.css";
 import ReactToPrint from "react-to-print";
-import { Component, useContext, useRef, useState } from "react";
+import { Component, useContext, useEffect, useRef, useState } from "react";
 import { WorkloadDataProps } from "constants/interface/formProps";
 import { getDate, getSchoolYear, toTitleCase } from "utils/utils";
 import moment from "moment";
 import { ActiveComponentContext } from "context/activeComponentContext";
 import { ActiveComponent } from "constants/enums/activeComponent";
 import { ProgressSider } from "components/workload/workloadSider";
-import { db } from "../../../firebase/clientApp";
-import { doc, increment, updateDoc } from "firebase/firestore";
 import {
   deleteWorkload,
   submitWorkload,
   unsubmitWorkload,
 } from "../../../firebase/firestoreQueries";
+import { useAuthSession } from "utils/hooks";
+import LoadingScreen from "components/layout/loadingScreen";
+// import { Image } from "next/image";
 
-const { Content, Sider } = Layout;
+const { Content } = Layout;
 
 interface ResearchAndProductionProps {
   title: string;
@@ -53,6 +53,9 @@ interface NameTitleSignatureProps {
   title: string;
   signature?: any;
   span?: number;
+  tag?: string;
+  validated?: boolean;
+  owner?: boolean;
 }
 
 function ResearchFormFields({
@@ -237,12 +240,30 @@ function NameTitleSignatureField({
   name,
   title,
   signature,
+  validated,
+  tag,
   span,
+  owner,
 }: NameTitleSignatureProps) {
+  console.log("SIGNATURE", signature, name);
+
   return (
-    <Row>
+    <Row style={{ position: "relative", bottom: "10px" }}>
       <Col span={span}>
-        <Row justify="center">{signature}</Row>
+        <Row style={{ position: "absolute", bottom: "55px" }}>{tag}</Row>
+        <Row justify="center" style={{ height: "35px" }}>
+          {validated || owner ? (
+            <div
+              style={{
+                position: "relative",
+                bottom: "0px",
+                // display: "inline-block",
+              }}
+            >
+              <Image width={180} height={60} src={signature} alt="Signature" />
+            </div>
+          ) : null}
+        </Row>
         <Row
           justify="center"
           style={{
@@ -274,8 +295,13 @@ function WorkloadCommitteeField({ name }: { name: string }) {
 class WorkloadFormToPrint extends Component<{
   workload: WorkloadDataProps | undefined;
   validators: any;
+  ownerSignature: string;
 }> {
-  constructor(props: { workload: WorkloadDataProps; validators: any }) {
+  constructor(props: {
+    workload: WorkloadDataProps;
+    validators: any;
+    ownerSignature: string;
+  }) {
     super(props);
   }
 
@@ -511,8 +537,8 @@ class WorkloadFormToPrint extends Component<{
         </Row>
         <br />
         <Row>
-          <Col span={3}>Prepared by:</Col>
-          <Col span={15}></Col>
+          {/* <Col span={3}>Prepared by:</Col> */}
+          <Col span={18}></Col>
           <Col
             span={4}
             style={{
@@ -559,46 +585,55 @@ class WorkloadFormToPrint extends Component<{
             this.props.workload?.doctorate
           }`}
           title="Faculty"
+          signature={this.props.ownerSignature}
+          owner={true}
+          tag="Prepared by:"
           span={6}
         />
         <br />
         <Row>
-          <Col span={9}>
+          <Col span={9} style={{ height: "10px" }}>
             {/* <Row>left</Row> */}
             <br />
-            <Row>Verified by:</Row>
-            <br />
+            {/* <Row style={{ position: "absolute" }}>Verified by:</Row> */}
+            {/* <br /> */}
 
             <NameTitleSignatureField
-              name={`${this.props.validators.part1[0].username.toUpperCase()}, ${
-                this.props.validators.part1[0].extension
+              name={`${this.props.validators[0].username.toUpperCase()}, ${
+                this.props.validators[0].extension
               }`}
-              title={this.props.validators.part1[0].position}
+              title={this.props.validators[0].position}
+              signature={this.props.validators[0].signature}
+              validated={this.props.validators[0].validated}
+              tag="Verified by:"
               span={17}
             />
 
-            <br />
-            <Row>Certified Correct:</Row>
+            {/* <Row>Certified Correct:</Row> */}
 
             <br />
             <NameTitleSignatureField
-              name={`${this.props.validators.part1[1].username.toUpperCase()}, ${
-                this.props.validators.part1[1].extension
+              name={`${this.props.validators[1].username.toUpperCase()}, ${
+                this.props.validators[1].extension
               }`}
-              title={`${this.props.validators.part1[1].position}, ${this.props.validators.part1[1].college}`}
+              title={`${this.props.validators[1].position}, ${this.props.validators[1].college}`}
+              signature={this.props.validators[1].signature}
+              validated={this.props.validators[1].validated}
+              tag="Certified Correct:"
               span={17}
             />
-            <br />
             <NameTitleSignatureField
-              name={`${this.props.validators.part1[2].username.toUpperCase()}, ${
-                this.props.validators.part1[2].extension
+              name={`${this.props.validators[2].username.toUpperCase()}, ${
+                this.props.validators[2].extension
               }`}
-              title={this.props.validators.part1[2].position}
+              title={this.props.validators[2].position}
+              signature={this.props.validators[2].signature}
+              validated={this.props.validators[2].validated}
               span={17}
             />
           </Col>
           <Col span={4}></Col>
-          <Col span={10}>
+          <Col span={10} style={{ position: "relative", bottom: "30px" }}>
             <Row>Checked by:</Row>
             <br />
             <Row
@@ -609,15 +644,16 @@ class WorkloadFormToPrint extends Component<{
             >
               CAMPUS FACULTY WORKLOAD COMMITTEE
             </Row>
-            <br />
 
             <Row justify="center">
-              <Col span={12}>
+              <Col span={12} style={{ height: "10px" }}>
                 <NameTitleSignatureField
-                  name={`${this.props.validators.part1[3].username.toUpperCase()}, ${
-                    this.props.validators.part1[3].extension
+                  name={`${this.props.validators[3].username.toUpperCase()}, ${
+                    this.props.validators[3].extension
                   }`}
-                  title={this.props.validators.part1[3].position}
+                  title={this.props.validators[3].position}
+                  signature={this.props.validators[3].signature}
+                  validated={this.props.validators[3].validated}
                   span={22}
                 />
               </Col>
@@ -625,22 +661,24 @@ class WorkloadFormToPrint extends Component<{
 
               <Col span={11}>
                 <NameTitleSignatureField
-                  name={`${this.props.validators.part1[4].username.toUpperCase()}, ${
-                    this.props.validators.part1[4].extension
+                  name={`${this.props.validators[4].username.toUpperCase()}, ${
+                    this.props.validators[4].extension
                   }`}
-                  title={this.props.validators.part1[4].position}
+                  title={this.props.validators[4].position}
+                  signature={this.props.validators[4].signature}
+                  validated={this.props.validators[4].validated}
                 />
               </Col>
             </Row>
-            <br />
-            <br />
             <Row justify="center">
               <Col span={18}>
                 <NameTitleSignatureField
-                  name={`${this.props.validators.part1[5].username.toUpperCase()}, ${
-                    this.props.validators.part1[5].extension
+                  name={`${this.props.validators[5].username.toUpperCase()}, ${
+                    this.props.validators[5].extension
                   }`}
-                  title={this.props.validators.part1[5].position}
+                  title={this.props.validators[5].position}
+                  signature={this.props.validators[5].signature}
+                  validated={this.props.validators[5].validated}
                   span={24}
                 />
                 <br />
@@ -678,8 +716,17 @@ interface WorkloadItemProps {
 }
 
 function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
+  const [_, __, ___, ____, userData] = useAuthSession();
+  console.log("signature", workload.ownerSignature);
+
   const selectedItem: WorkloadDataProps = workload.workload;
-  const validators = workload.validators;
+  const withUIDValidators = workload.validators;
+  const validators = Object.values(withUIDValidators).sort(
+    (a: any, b: any) => a.positionIndex - b.positionIndex
+  );
+
+  console.log(validators, "dators");
+
   // const sortedValidators = workload.validators.sort(
   //   (a: any, b: any) => a.positionIndex - b.positionIndex
   // );
@@ -695,16 +742,17 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
   const [submitting, setSubmitting] = useState(false);
 
   let componentRef = useRef<any>();
+
+  if (!userData) {
+    return <LoadingScreen />;
+  }
+
   return (
     <Layout style={{ height: "100vh" }}>
       <WorkloadHeader />
       <Layout
         style={{
-          // background: "#fff",
           marginTop: "10px",
-          // width: "8.5in",
-          // height: "11in",
-          // margin: "auto",
         }}
       >
         <Content
@@ -736,13 +784,22 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
                       okText="Yes"
                       cancelText="No"
                       onConfirm={() => {
+                        if (!userData.signature) {
+                          message.error(
+                            "Please check your profile and provide a signature"
+                          );
+                          return;
+                        }
                         // unsubmitWorkload(workload.workloadId, "Echague Campus");
-                        submitWorkload(workload.workloadId, campusId).then(
-                          () => {
-                            setSubmitted(true);
-                            message.success("Workload approved!");
-                          }
-                        );
+                        submitWorkload(
+                          workload.workloadId,
+                          campusId,
+                          true,
+                          userData.uid
+                        ).then(() => {
+                          setSubmitted(true);
+                          message.success("Workload approved!");
+                        });
                         // setSubmitted(false);
                       }}
                       onCancel={() => {}}
@@ -785,14 +842,20 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
                       trigger={() => <Button type="default">PRINT</Button>}
                       content={() => componentRef.current!}
                     />
-                    <Button key="edit" type="default">
+                    {/* <Button key="edit" type="default">
                       EDIT
-                    </Button>
+                    </Button> */}
                     {!submitted ? (
                       <Button
                         key="submit"
                         type="primary"
                         onClick={() => {
+                          if (!userData.signature) {
+                            message.error(
+                              "Please check your profile and provide a signature"
+                            );
+                            return;
+                          }
                           setSubmitting(true);
                           setTimeout(() => {
                             submitWorkload(workload.workloadId, campusId);
@@ -840,6 +903,7 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
                   ref={componentRef}
                   workload={selectedItem}
                   validators={validators}
+                  ownerSignature={workload.ownerSignature}
                 />
               </div>
             </Col>

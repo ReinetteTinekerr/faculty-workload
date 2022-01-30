@@ -2,6 +2,7 @@ import { initializeApp, getApp, FirebaseOptions } from "firebase/app";
 import "firebase/auth";
 import { getAuth } from "firebase/auth";
 import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 const config: FirebaseOptions = {
   apiKey: process.env.NEXT_PUBLIC_API_KEY!,
@@ -24,6 +25,7 @@ const firebaseApp = createFirebaseApp(config);
 
 export const db = getFirestore(firebaseApp);
 export const auth = getAuth(firebaseApp);
+export const storage = getStorage(firebaseApp);
 
 enableIndexedDbPersistence(db).catch((err) => {
   if (err.code == "failed-precondition") {

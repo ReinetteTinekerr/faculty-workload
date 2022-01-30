@@ -9,23 +9,33 @@ import {
   PageHeader,
   Select,
   Space,
+  Image,
   Tag,
+  message,
 } from "antd";
 import Avatar from "antd/lib/avatar/avatar";
 import { Content } from "antd/lib/layout/layout";
 import { ActiveComponent } from "constants/enums/activeComponent";
 import { UserProfileProps } from "constants/interface/formProps";
 import { ActiveComponentContext } from "context/activeComponentContext";
-import { useContext, useState } from "react";
+import { createRef, useContext, useEffect, useState } from "react";
+import SignaturePad from "react-signature-pad-wrapper";
+import { getImageURL, uploadImage } from "../../../firebase/firestorageUtils";
+import {
+  getUserProfileFromCacheElseServer,
+  updateUserSignature,
+} from "../../../firebase/firestoreQueries";
 
 const { Option } = Select;
 
 const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
-  console.log(userData);
-
   const { setActiveComponent } = useContext(ActiveComponentContext)!;
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
+  const [isSignatureModalVisible, setIsSignatureModalVisible] = useState(false);
+  const [editSignature, setEditSignature] = useState(false);
+  const [isSignatureSaving, setIsSignatureSaving] = useState(false);
   const [loading, setLoading] = useState(false);
+  const signaturePadRef = createRef<SignaturePad>();
   const [form] = Form.useForm();
   const {
     baccalaureate,
@@ -38,18 +48,23 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
     position,
     role,
     username,
+    uid,
+    signature,
   } = userData!;
 
-  const showModal = () => {
-    setIsModalVisible(true);
+  const showProfileModal = () => {
+    setIsProfileModalVisible(true);
+  };
+  const showSignatureModal = () => {
+    setIsSignatureModalVisible(true);
   };
 
   const handleOk = () => {
-    setIsModalVisible(false);
+    setIsProfileModalVisible(false);
   };
 
   const handleCancel = () => {
-    setIsModalVisible(false);
+    setIsProfileModalVisible(false);
   };
   const onFinish = (values: any) => {
     console.log("Success:", values);
@@ -81,7 +96,10 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
             setActiveComponent(ActiveComponent.WorkloadIndex);
           }}
           extra={[
-            <Button key="1" type="primary" onClick={showModal}>
+            <Button key="1" type="default" onClick={showSignatureModal}>
+              SIGNATURE
+            </Button>,
+            <Button key="2" type="primary" onClick={showProfileModal}>
               EDIT
             </Button>,
           ]}
@@ -114,12 +132,103 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
         </Descriptions>
 
         <Modal
+          width={500}
+          title="Signature"
+          visible={isSignatureModalVisible}
+          onCancel={() => setIsSignatureModalVisible(false)}
+          footer={[
+            <>
+              <Button
+                key={"back"}
+                onClick={() => {
+                  setEditSignature(false);
+                  setIsSignatureModalVisible(false);
+                }}
+              >
+                CANCEL
+              </Button>
+              <Button
+                key={"clear"}
+                onClick={() => {
+                  setEditSignature(true);
+                  signaturePadRef.current?.clear();
+                }}
+              >
+                CLEAR
+              </Button>
+              <Button
+                key={"edit"}
+                type="default"
+                onClick={() => {
+                  setEditSignature(true);
+                }}
+              >
+                EDIT
+              </Button>
+              <Button
+                disabled={isSignatureSaving || !editSignature}
+                key={"ok"}
+                type="primary"
+                onClick={async () => {
+                  if (signaturePadRef.current?.isEmpty()) {
+                    message.error("Signature must not be empty!");
+                    setEditSignature(false);
+                    return;
+                  }
+                  setIsSignatureSaving(true);
+                  const image = signaturePadRef.current?.toDataURL();
+                  if (image === undefined) return;
+                  await uploadImage(image, uid);
+                  const url = await getImageURL(uid);
+                  if (url === null) return;
+                  const urlWithoutToken = url.split("&token")[0];
+
+                  if (signature === undefined) {
+                    console.log("updated");
+
+                    await updateUserSignature(uid, urlWithoutToken);
+                    await getUserProfileFromCacheElseServer(uid, true);
+                  }
+                  // console.log(url);
+
+                  setIsSignatureSaving(false);
+                  setEditSignature(false);
+                }}
+              >
+                {isSignatureSaving ? "SAVING..." : "SAVE"}
+              </Button>
+            </>,
+          ]}
+        >
+          {!editSignature ? (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Image width={300} alt="Signature" src={signature} />
+            </div>
+          ) : (
+            <SignaturePad
+              ref={signaturePadRef}
+              options={{
+                backgroundColor: "rgb(0,0,0,0)",
+                minWidth: 1,
+                maxWidth: 2,
+                penColor: "rgb(0,0,0)",
+              }}
+            />
+          )}
+        </Modal>
+        <Modal
           title="Edit Profile"
-          visible={isModalVisible}
+          visible={isProfileModalVisible}
           onOk={handleOk}
           onCancel={handleCancel}
           footer={[
-            <Button key="back" onClick={() => setIsModalVisible(false)}>
+            <Button key="back" onClick={() => setIsProfileModalVisible(false)}>
               CANCEL
             </Button>,
             <Button

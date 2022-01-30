@@ -73,9 +73,9 @@ export function WorkloadList({ workloads }: any) {
                 </>
               }
             />
-            <List.Item
+            {/* <List.Item
               extra={<WorkloadProgress workload={workloads[index]} />}
-            ></List.Item>
+            ></List.Item> */}
             <List.Item extra={<div>{getDate(item.createdAt)}</div>}></List.Item>
           </List.Item>
         )}

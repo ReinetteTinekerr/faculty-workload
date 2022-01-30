@@ -55,7 +55,7 @@ export function WorkloadModal({
   // }, [loading, setVisible]);
 
   const onCheck = async () => {
-    if (user === null || user === undefined || userData === null) {
+    if (!user || !userData) {
       return { success: false };
     }
 
@@ -66,10 +66,16 @@ export function WorkloadModal({
         throw "table is empty";
       }
 
+      if (!userData.signature) {
+        message.error("Please check your profile and provide a signature");
+        return { success: false };
+      }
+
       const dataWithId = await updateAndUploadValuesToFirestore(
         values,
         user,
-        userData!.campusId
+        userData!.campusId,
+        userData!.signature
       );
       message.success("Workload created Woohoo!");
 
@@ -135,7 +141,8 @@ export function WorkloadModal({
 async function updateAndUploadValuesToFirestore(
   values: WorkloadDataProps,
   user: User,
-  campusId: string
+  campusId: string,
+  ownerSignature: string
 ) {
   // const campusRef = doc(db, "campuses", campusId);
   // const campusSnap = await getDoc(campusRef);
@@ -159,7 +166,8 @@ async function updateAndUploadValuesToFirestore(
     withTotalOfWorkloads,
     campusId,
     user.uid,
-    validators
+    validators,
+    ownerSignature
   );
   console.log(uploadedWorkload);
 
@@ -177,17 +185,29 @@ export function getValidators(validatorsData: any, college: string) {
       member.college.toUpperCase() === college.toUpperCase()
     );
   });
-
-  const isuCommittee = validatorsData.filter((member: any) => {
-    return member.position === "University Workload Committee";
-  });
-
-  const validators = {
-    part1: [...dean, ...validatorsWithoutDean].sort(
-      (a, b) => a.positionIndex - b.positionIndex
+  const objValidators = validatorsWithoutDean.reduce(
+    (obj: any, item: any) => (
+      (obj[item.uid] = { validated: false, ...item }), obj
     ),
-    part2: isuCommittee,
-  };
+    {}
+  );
+
+  const objValidatorsDean = dean.reduce(
+    (obj: any, item: any) => (
+      (obj[item.uid] = { validated: false, ...item }), obj
+    ),
+    {}
+  );
+
+  // const validators = {
+  //   part1: [...dean, ...validatorsWithoutDean].sort(
+  //     (a, b) => a.positionIndex - b.positionIndex
+  //   ),
+  //   part2: isuCommittee,
+  // };
+  const validators = { ...objValidators, ...objValidatorsDean };
+  console.log(validators);
+
   console.log("validators", validators);
 
   return JSON.parse(JSON.stringify(validators));

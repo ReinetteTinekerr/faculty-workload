@@ -19,11 +19,23 @@ import {
 } from "firebase/firestore";
 import { db } from "./clientApp";
 
-export async function submitWorkload(workloadId: string, campusId: string) {
+export async function submitWorkload(
+  workloadId: string,
+  campusId: string,
+  toValidate?: boolean,
+  validatorId?: string
+) {
   console.log(workloadId, campusId);
 
   const workloadRef = doc(db, "workloads", campusId, "workloads", workloadId);
-  await updateDoc(workloadRef, { validationProgress: increment(1) });
+  if (toValidate) {
+    await updateDoc(workloadRef, {
+      validationProgress: increment(1),
+      [`validators.${validatorId}.validated`]: true,
+    });
+  } else {
+    await updateDoc(workloadRef, { validationProgress: increment(1) });
+  }
 }
 
 export async function unsubmitWorkload(workloadId: string, campusId: string) {
@@ -41,21 +53,29 @@ export async function getUserProfileFromCacheElseServer(
   fromServer: boolean
 ) {
   const userRef = doc(db, "users", userId);
-  try {
-    const doc = await getDocFromCache(userRef);
-    console.log(doc.metadata, "from cache user");
-    // doc.metadata.hasPendingWrites
-    // console.log(doc.data());
+  if (fromServer) {
+    try {
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        console.log(userSnap.metadata);
+        console.log("Document data:", userSnap.data());
+        return userSnap.data();
+      } else {
+        console.log("No such document!");
+        return null;
+      }
+    } catch (error) {
+      return null;
+    }
+  } else {
+    try {
+      const doc = await getDocFromCache(userRef);
+      console.log(doc.metadata, "from cache user");
+      // doc.metadata.hasPendingWrites
+      // console.log(doc.data());
 
-    return doc.data();
-  } catch (error) {
-    const userSnap = await getDoc(userRef);
-    if (userSnap.exists()) {
-      console.log(userSnap.metadata);
-      console.log("Document data:", userSnap.data());
-      return userSnap.data();
-    } else {
-      console.log("No such document!");
+      return doc.data();
+    } catch (error) {
       return null;
     }
   }
@@ -230,7 +250,8 @@ export async function uploadWorkloadToFirestore(
   workload: any,
   campusId: string,
   userId: string,
-  validators: any
+  validators: any,
+  ownerSignature: string
 ) {
   const workloadRef = doc(collection(db, "workloads", campusId, "workloads"));
   const dataToUpload = {
@@ -239,6 +260,7 @@ export async function uploadWorkloadToFirestore(
     ),
     timestamp: serverTimestamp(),
     createdBy: userId,
+    ownerSignature,
     validationProgress: 0,
     approved: false,
     validators: validators,
@@ -275,4 +297,11 @@ export async function getCampusWorkloads(
     setCampusWorkloads(() => items);
   });
   return unsubscribe;
+}
+
+export async function updateUserSignature(uid: string, url: string) {
+  const userRef = doc(db, "users", uid);
+
+  // await setDoc(userRef, { signature: url }, { merge: true });
+  await updateDoc(userRef, { signature: url });
 }
