@@ -10,32 +10,32 @@ import { useAuthSession } from "utils/hooks";
 import {
   getApprovedUserWorkloads,
   getUsersByCampusAndRole,
-  getUserWorkloads,
+  getDraftsUserWorkloads,
   getUserWorkloadsInProgress,
 } from "../../firebase/firestoreQueries";
 
 const Faculty: NextPage = () => {
   const [user, loading, error, userRole, userData] = useAuthSession();
   const { activeComponent, selectedItem } = useContext(ActiveComponentContext)!;
-  const [workloads, setWorkloads] = useState<any>(null);
+  const [draftWorkloads, setDraftWorkloads] = useState<any>(null);
   const [workloadsInProgress, setWorkloadsInProgress] = useState<any>(null);
   const [approvedWorkloads, setApprovedWorkloads] = useState<any>(null);
   // const [workloads, setWorkloads] = useState<any>(null);
 
   useEffect(() => {
-    if (userData === null || !user) return;
+    if (!userData || !user) return;
 
-    const unsubscribe1 = getUserWorkloads(
+    const unsubscribe1 = getDraftsUserWorkloads(
       user.uid,
       userData.campus,
-      setWorkloads
+      setDraftWorkloads
     );
 
     // return () => unsubscribe();
   }, [userData, user]);
 
   useEffect(() => {
-    if (userData === null || !user) return;
+    if (!userData || !user) return;
 
     const unsubscribe2 = getUserWorkloadsInProgress(
       user.uid,
@@ -45,7 +45,7 @@ const Faculty: NextPage = () => {
   }, [userData, user]);
 
   useEffect(() => {
-    if (userData === null || !user) return;
+    if (!userData || !user) return;
     const unsubscribe = getApprovedUserWorkloads(
       user.uid,
       userData.campusId,
@@ -53,7 +53,7 @@ const Faculty: NextPage = () => {
     );
   }, [userData, user]);
 
-  if (loading || userRole === null || workloads === null || userData === null) {
+  if (loading || !userRole || !draftWorkloads || !userData) {
     return <LoadingScreen />;
   }
 
@@ -63,7 +63,7 @@ const Faculty: NextPage = () => {
         <WorkloadIndex
           user={user}
           userData={userData}
-          workloads={workloads}
+          workloads={draftWorkloads}
           workloadsInProgress={workloadsInProgress}
           approvedWorkloads={approvedWorkloads}
         />

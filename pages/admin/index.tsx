@@ -34,7 +34,6 @@ import {
   getUsersByCampusAndRole,
 } from "../../firebase/firestoreQueries";
 import { WorkloadList } from "components/workload/WorkloadList";
-import { getValidators } from "utils/utils";
 import WorkloadItem from "components/routes/faculty/WorkloadItem";
 
 const { TabPane } = Tabs;
@@ -51,22 +50,25 @@ const Admin: NextPage = () => {
   const [tabKey, setTabKey] = useState("1");
 
   useEffect(() => {
-    if (!user || !userData) return;
+    if (!user) return;
     getUsers().then((users) => setFirebaseUsers(users));
-  }, [user, userData]);
+  }, [user]);
 
   useEffect(() => {
-    if (!user || !userData) return;
+    if (!userData || !user) return;
     getCampusWorkloads(userData.campusId, setCampusWorkloads).then(() => {});
   }, [user, userData]);
 
   useEffect(() => {
-    if (!user || !userData) return;
+    if (!userData) return;
     getUsersByCampusAndRole(userData.campusId, "VALIDATOR").then((docs) => {
-      const validatorsModified = getValidators(docs, "CCSICT");
-      setValidators(() => validatorsModified.part1);
+      console.log(docs);
+
+      setValidators(() =>
+        docs.sort((a: any, b: any) => a.positionIndex - b.positionIndex)
+      );
     });
-  }, [user, userData]);
+  }, [userData]);
 
   if (
     loading ||

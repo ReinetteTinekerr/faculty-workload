@@ -208,7 +208,12 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
                 alignItems: "center",
               }}
             >
-              <Image width={300} alt="Signature" src={signature} />
+              <Image
+                width={300}
+                alt="Signature"
+                src={signature}
+                // placeholder={true}
+              />
             </div>
           ) : (
             <SignaturePad

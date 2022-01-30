@@ -44,12 +44,7 @@ const ValidateWorkloads: NextPage = () => {
     );
   }, [userData, user]);
 
-  if (
-    loading ||
-    userRole === null ||
-    facultyWorkloads === null ||
-    user == null
-  ) {
+  if (loading || !userRole || !facultyWorkloads || !user) {
     return <LoadingScreen />;
   }
 

@@ -13,6 +13,7 @@ import {
   getUsersByCampusAndRole,
   uploadWorkloadToFirestore,
 } from "../../firebase/firestoreQueries";
+import { getValidators } from "utils/utils";
 
 const formItemLayout = {
   labelCol: {
@@ -172,45 +173,6 @@ async function updateAndUploadValuesToFirestore(
   console.log(uploadedWorkload);
 
   return uploadedWorkload;
-}
-
-export function getValidators(validatorsData: any, college: string) {
-  const validatorsWithoutDean = validatorsData.filter((member: any) => {
-    return member.position !== "Dean";
-  });
-
-  const dean = validatorsData.filter((member: any) => {
-    return (
-      member.position === "Dean" &&
-      member.college.toUpperCase() === college.toUpperCase()
-    );
-  });
-  const objValidators = validatorsWithoutDean.reduce(
-    (obj: any, item: any) => (
-      (obj[item.uid] = { validated: false, ...item }), obj
-    ),
-    {}
-  );
-
-  const objValidatorsDean = dean.reduce(
-    (obj: any, item: any) => (
-      (obj[item.uid] = { validated: false, ...item }), obj
-    ),
-    {}
-  );
-
-  // const validators = {
-  //   part1: [...dean, ...validatorsWithoutDean].sort(
-  //     (a, b) => a.positionIndex - b.positionIndex
-  //   ),
-  //   part2: isuCommittee,
-  // };
-  const validators = { ...objValidators, ...objValidatorsDean };
-  console.log(validators);
-
-  console.log("validators", validators);
-
-  return JSON.parse(JSON.stringify(validators));
 }
 
 function EvaluateWorkload(values: WorkloadDataProps) {

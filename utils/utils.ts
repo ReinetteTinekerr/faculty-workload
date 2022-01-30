@@ -25,6 +25,33 @@ export function getDate(timestamp: number) {
   return moment(new Date(timestamp)).format("LLL");
 }
 
+// export function getValidators(validatorsData: any, college: string) {
+//   const validatorsWithoutDean = validatorsData.filter((member: any) => {
+//     return member.position !== "Dean";
+//   });
+
+//   const dean = validatorsData.filter((member: any) => {
+//     return (
+//       member.position === "Dean" &&
+//       member.college.toUpperCase() === college.toUpperCase()
+//     );
+//   });
+
+//   const isuCommittee = validatorsData.filter((member: any) => {
+//     return member.position === "University Workload Committee";
+//   });
+
+//   const validators = {
+//     part1: [...dean, ...validatorsWithoutDean].sort(
+//       (a, b) => a.positionIndex - b.positionIndex
+//     ),
+//     part2: isuCommittee,
+//   };
+//   console.log("validators", validators);
+
+//   return JSON.parse(JSON.stringify(validators));
+// }
+
 export function getValidators(validatorsData: any, college: string) {
   const validatorsWithoutDean = validatorsData.filter((member: any) => {
     return member.position !== "Dean";
@@ -36,17 +63,29 @@ export function getValidators(validatorsData: any, college: string) {
       member.college.toUpperCase() === college.toUpperCase()
     );
   });
-
-  const isuCommittee = validatorsData.filter((member: any) => {
-    return member.position === "University Workload Committee";
-  });
-
-  const validators = {
-    part1: [...dean, ...validatorsWithoutDean].sort(
-      (a, b) => a.positionIndex - b.positionIndex
+  const objValidators = validatorsWithoutDean.reduce(
+    (obj: any, item: any) => (
+      (obj[item.uid] = { validated: false, ...item }), obj
     ),
-    part2: isuCommittee,
-  };
+    {}
+  );
+
+  const objValidatorsDean = dean.reduce(
+    (obj: any, item: any) => (
+      (obj[item.uid] = { validated: false, ...item }), obj
+    ),
+    {}
+  );
+
+  // const validators = {
+  //   part1: [...dean, ...validatorsWithoutDean].sort(
+  //     (a, b) => a.positionIndex - b.positionIndex
+  //   ),
+  //   part2: isuCommittee,
+  // };
+  const validators = { ...objValidators, ...objValidatorsDean };
+  console.log(validators);
+
   console.log("validators", validators);
 
   return JSON.parse(JSON.stringify(validators));

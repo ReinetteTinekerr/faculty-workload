@@ -7,6 +7,7 @@ import { ActiveComponentContext } from "context/activeComponentContext";
 import { getDate } from "utils/utils";
 import { WorkloadList } from "./WorkloadList";
 import { CheckOutlined, FormOutlined, ReloadOutlined } from "@ant-design/icons";
+import { useState } from "react";
 
 const { Content } = Layout;
 const { TabPane } = Tabs;
@@ -17,16 +18,6 @@ export function WorkloadContentList({
   workloadsInProgress,
   approvedWorkloads,
 }: ShowModalProps) {
-  // console.log("content list", workloads);
-  // const userWorkloads = workloads
-  //   .map((workload: any) => {
-  //     return workload.workload;
-  //   })
-  //   .sort((a: any, b: any) => b.createdAt - a.createdAt);
-  // const { setActiveComponent, setSelectedItem } = useContext(
-  //   ActiveComponentContext
-  // )!;
-
   const style = {
     margin: "0px 10px",
     background: "#fff",
@@ -35,26 +26,9 @@ export function WorkloadContentList({
 
   return (
     <Content style={style}>
-      {/* <PageHeader
-        style={{
-          padding: "0px",
-          paddingLeft: "10px",
-        }}
-        title="Your Workloads"
-        extra={[
-          <Button
-            key="1"
-            type="primary"
-            shape="round"
-            onClick={() => setVisible(true)}
-          >
-            ADD NEW WORKLOAD
-          </Button>,
-        ]}
-      /> */}
       <Tabs
-        defaultActiveKey="1"
-        onChange={() => {}}
+        defaultActiveKey={"1"}
+        onChange={(key) => {}}
         centered
         size="small"
         tabBarExtraContent={{
