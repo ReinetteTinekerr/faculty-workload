@@ -62,7 +62,7 @@ const Admin: NextPage = () => {
   useEffect(() => {
     if (!userData) return;
     getUsersByCampusAndRole(userData.campusId, "VALIDATOR").then((docs) => {
-      console.log(docs);
+      console.log(docs, "docs");
 
       setValidators(() =>
         docs.sort((a: any, b: any) => a.positionIndex - b.positionIndex)
@@ -158,9 +158,10 @@ const Admin: NextPage = () => {
               >
                 <Row justify="center">
                   <Timeline>
-                    {validators.map((validator: any) => {
+                    {validators.map((validator: any, index: number) => {
                       return (
                         <Timeline.Item key={validator.uid}>
+                          {`[${index + 1}] `}
                           {validator.username} {validator.extension},{" "}
                           {validator.position}
                         </Timeline.Item>

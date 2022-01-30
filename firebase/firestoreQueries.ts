@@ -227,9 +227,11 @@ export async function getUsersByCampusAndRole(campusId: string, role: string) {
 
   try {
     const usersSnapshots = await getDocsFromCache(userValidatorsRef);
+    if (usersSnapshots.empty) throw "no data from cache";
     usersSnapshots.forEach((snapshot) => {
       data.push(snapshot.data());
     });
+
     console.log("validators from cache");
     // console.log(usersSnapshots.metadata);
 
