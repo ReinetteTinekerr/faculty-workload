@@ -14,7 +14,7 @@ interface SignInProps {
 
 export const login = async ({ email, password }: SignInProps) => {
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    await signInWithEmailAndPassword(auth, email.trim(), password);
     return { error: false, message: "sucess" };
   } catch (error) {
     return { error: true, message: error };
