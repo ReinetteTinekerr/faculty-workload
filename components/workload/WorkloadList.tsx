@@ -6,7 +6,7 @@ import styles from "styles/Home.module.css";
 import { getDate } from "utils/utils";
 
 export function WorkloadList({ workloads }: any) {
-  //stable
+  //main
   const { setActiveComponent, setSelectedItem } = useContext(
     ActiveComponentContext
   )!;
