@@ -9,7 +9,6 @@ import UserProfile from "components/routes/faculty/UserProfile";
 import { useAuthSession } from "utils/hooks";
 import {
   getApprovedUserWorkloads,
-  getUsersByCampusAndRole,
   getDraftsUserWorkloads,
   getUserWorkloadsInProgress,
 } from "../../firebase/firestoreQueries";
@@ -74,6 +73,7 @@ const Faculty: NextPage = () => {
           campusId={userData.campusId}
           workload={selectedItem!}
           positionIndex={userData.positionIndex}
+          role={userRole}
         />
       );
     case ActiveComponent.Profile:

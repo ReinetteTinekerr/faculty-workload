@@ -245,7 +245,7 @@ function NameTitleSignatureField({
   span,
   owner,
 }: NameTitleSignatureProps) {
-  console.log("SIGNATURE", signature, name);
+  // console.log("SIGNATURE", signature, name);
 
   return (
     <Row style={{ position: "relative", bottom: "10px" }}>
@@ -599,12 +599,12 @@ class WorkloadFormToPrint extends Component<{
             {/* <br /> */}
 
             <NameTitleSignatureField
-              name={`${this.props.validators[0].username.toUpperCase()}, ${
-                this.props.validators[0].extension
+              name={`${this.props.validators[0]?.username?.toUpperCase()}, ${
+                this.props.validators[0]?.extension
               }`}
-              title={this.props.validators[0].position}
-              signature={this.props.validators[0].signature}
-              validated={this.props.validators[0].validated}
+              title={this.props.validators[0]?.position}
+              signature={this.props.validators[0]?.signature}
+              validated={this.props.validators[0]?.validated}
               tag="Verified by:"
               span={17}
             />
@@ -613,27 +613,27 @@ class WorkloadFormToPrint extends Component<{
 
             <br />
             <NameTitleSignatureField
-              name={`${this.props.validators[1].username.toUpperCase()}, ${
+              name={`${this.props.validators[1]?.username?.toUpperCase()}, ${
                 this.props.validators[1].extension
               }`}
-              title={`${this.props.validators[1].position}, ${this.props.validators[1].college}`}
-              signature={this.props.validators[1].signature}
-              validated={this.props.validators[1].validated}
+              title={`${this.props.validators[1]?.position}, ${this.props.validators[1].college}`}
+              signature={this.props.validators[1]?.signature}
+              validated={this.props.validators[1]?.validated}
               tag="Certified Correct:"
               span={17}
             />
             <NameTitleSignatureField
-              name={`${this.props.validators[2].username.toUpperCase()}, ${
-                this.props.validators[2].extension
+              name={`${this.props.validators[2]?.username.toUpperCase()}, ${
+                this.props.validators[2]?.extension
               }`}
-              title={this.props.validators[2].position}
-              signature={this.props.validators[2].signature}
-              validated={this.props.validators[2].validated}
+              title={this.props.validators[2]?.position}
+              signature={this.props.validators[2]?.signature}
+              validated={this.props.validators[2]?.validated}
               span={17}
             />
           </Col>
-          <Col span={4}></Col>
-          <Col span={10} style={{ position: "relative", bottom: "30px" }}>
+          <Col span={3}></Col>
+          <Col span={12} style={{ position: "relative", bottom: "30px" }}>
             <Row>Checked by:</Row>
             <br />
             <Row
@@ -648,12 +648,12 @@ class WorkloadFormToPrint extends Component<{
             <Row justify="center">
               <Col span={12} style={{ height: "10px" }}>
                 <NameTitleSignatureField
-                  name={`${this.props.validators[3].username.toUpperCase()}, ${
-                    this.props.validators[3].extension
+                  name={`${this.props.validators[3]?.username.toUpperCase()}, ${
+                    this.props.validators[3]?.extension
                   }`}
-                  title={this.props.validators[3].position}
-                  signature={this.props.validators[3].signature}
-                  validated={this.props.validators[3].validated}
+                  title={this.props.validators[3]?.position}
+                  signature={this.props.validators[3]?.signature}
+                  validated={this.props.validators[3]?.validated}
                   span={22}
                 />
               </Col>
@@ -661,24 +661,24 @@ class WorkloadFormToPrint extends Component<{
 
               <Col span={11}>
                 <NameTitleSignatureField
-                  name={`${this.props.validators[4].username.toUpperCase()}, ${
-                    this.props.validators[4].extension
+                  name={`${this.props.validators[4]?.username.toUpperCase()}, ${
+                    this.props.validators[4]?.extension
                   }`}
-                  title={this.props.validators[4].position}
-                  signature={this.props.validators[4].signature}
-                  validated={this.props.validators[4].validated}
+                  title={this.props.validators[4]?.position}
+                  signature={this.props.validators[4]?.signature}
+                  validated={this.props.validators[4]?.validated}
                 />
               </Col>
             </Row>
             <Row justify="center">
               <Col span={18}>
                 <NameTitleSignatureField
-                  name={`${this.props.validators[5].username.toUpperCase()}, ${
-                    this.props.validators[5].extension
+                  name={`${this.props.validators[5]?.username.toUpperCase()}, ${
+                    this.props.validators[5]?.extension
                   }`}
-                  title={this.props.validators[5].position}
-                  signature={this.props.validators[5].signature}
-                  validated={this.props.validators[5].validated}
+                  title={this.props.validators[5]?.position}
+                  signature={this.props.validators[5]?.signature}
+                  validated={this.props.validators[5]?.validated}
                   span={24}
                 />
                 <br />
@@ -717,7 +717,6 @@ interface WorkloadItemProps {
 
 function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
   const [_, __, ___, ____, userData] = useAuthSession();
-  console.log("signature", workload.ownerSignature);
 
   const selectedItem: WorkloadDataProps = workload.workload;
   const withUIDValidators = workload.validators;
@@ -795,7 +794,8 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
                           workload.workloadId,
                           campusId,
                           true,
-                          userData.uid
+                          userData.uid,
+                          workload.validators
                         ).then(() => {
                           setSubmitted(true);
                           message.success("Workload approved!");
@@ -815,28 +815,37 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
                     </Popconfirm>
                   </div>
                 ) : (
+                  <></>
+                )}
+                {role === "FACULTY" ? (
                   <div>
-                    <Popconfirm
-                      title="Are you sure you want to DELETE this workload?"
-                      okText="Yes"
-                      cancelText="No"
-                      onConfirm={() => {
-                        setTimeout(() => {
-                          deleteWorkload(workload.workloadId, campusId).then(
-                            () => {
-                              // setSelectedItem(null);
-                              setActiveComponent(ActiveComponent.WorkloadIndex);
-                              message.warning("Workload Deleted!");
-                            }
-                          );
-                        });
-                      }}
-                      onCancel={() => {}}
-                    >
-                      <Button key="" danger onClick={() => {}}>
-                        DELETE
-                      </Button>
-                    </Popconfirm>
+                    {!workload.approved ? (
+                      <Popconfirm
+                        title="Are you sure you want to DELETE this workload?"
+                        okText="Yes"
+                        cancelText="No"
+                        onConfirm={() => {
+                          setTimeout(() => {
+                            deleteWorkload(workload.workloadId, campusId).then(
+                              () => {
+                                // setSelectedItem(null);
+                                setActiveComponent(
+                                  ActiveComponent.WorkloadIndex
+                                );
+                                message.warning("Workload Deleted!");
+                              }
+                            );
+                          });
+                        }}
+                        onCancel={() => {}}
+                      >
+                        <Button key="" danger onClick={() => {}}>
+                          DELETE
+                        </Button>
+                      </Popconfirm>
+                    ) : (
+                      <></>
+                    )}
                     <ReactToPrint
                       key={"print"}
                       trigger={() => <Button type="default">PRINT</Button>}
@@ -845,46 +854,58 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
                     {/* <Button key="edit" type="default">
                       EDIT
                     </Button> */}
-                    {!submitted ? (
-                      <Button
-                        key="submit"
-                        type="primary"
-                        onClick={() => {
-                          if (!userData.signature) {
-                            message.error(
-                              "Please check your profile and provide a signature"
-                            );
-                            return;
-                          }
-                          setSubmitting(true);
-                          setTimeout(() => {
-                            submitWorkload(workload.workloadId, campusId);
-                            setSubmitting(false);
-                            setSubmitted(true);
-                            message.success("Workload Submitted!");
-                          }, 1000);
-                        }}
-                      >
-                        {submitting ? "SUMITTING..." : "SUBMIT"}
-                      </Button>
-                    ) : (
-                      <Popconfirm
-                        key={"unsubmit"}
-                        title="Are you sure you want to unsubmit this workload?"
-                        okText="Yes"
-                        cancelText="No"
-                        onConfirm={() => {
-                          unsubmitWorkload(workload.workloadId, campusId);
-                          setSubmitted(false);
-                        }}
-                        onCancel={() => {}}
-                      >
-                        <Button key="1" type="dashed" onClick={() => {}}>
-                          UNSUBMIT
+                    {!workload.approved ? (
+                      !submitted ? (
+                        <Button
+                          key="submit"
+                          type="primary"
+                          onClick={() => {
+                            if (!userData.signature) {
+                              message.error(
+                                "Please check your profile and provide a signature"
+                              );
+                              return;
+                            }
+                            setSubmitting(true);
+                            setTimeout(() => {
+                              submitWorkload(
+                                workload.workloadId,
+                                campusId,
+                                false,
+                                "",
+                                workload.validators
+                              );
+                              setSubmitting(false);
+                              setSubmitted(true);
+                              message.success("Workload Submitted!");
+                            }, 1000);
+                          }}
+                        >
+                          {submitting ? "SUMITTING..." : "SUBMIT"}
                         </Button>
-                      </Popconfirm>
+                      ) : (
+                        <Popconfirm
+                          key={"unsubmit"}
+                          title="Are you sure you want to unsubmit this workload?"
+                          okText="Yes"
+                          cancelText="No"
+                          onConfirm={() => {
+                            unsubmitWorkload(workload.workloadId, campusId);
+                            setSubmitted(false);
+                          }}
+                          onCancel={() => {}}
+                        >
+                          <Button key="1" type="dashed" onClick={() => {}}>
+                            UNSUBMIT
+                          </Button>
+                        </Popconfirm>
+                      )
+                    ) : (
+                      <></>
                     )}
                   </div>
+                ) : (
+                  <></>
                 )}
               </div>,
             ]}

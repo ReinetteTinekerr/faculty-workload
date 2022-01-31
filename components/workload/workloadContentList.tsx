@@ -7,7 +7,6 @@ import { ActiveComponentContext } from "context/activeComponentContext";
 import { getDate } from "utils/utils";
 import { WorkloadList } from "./WorkloadList";
 import { CheckOutlined, FormOutlined, ReloadOutlined } from "@ant-design/icons";
-import { useState } from "react";
 
 const { Content } = Layout;
 const { TabPane } = Tabs;

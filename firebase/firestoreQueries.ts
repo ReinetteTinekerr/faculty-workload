@@ -65,7 +65,8 @@ export function getUserWorkloadsInProgress(
   const q = query(
     collection(db, "workloads", campusId, "workloads"),
     where("createdBy", "==", userId),
-    where("validationProgress", ">=", 1)
+    where("validationProgress", ">=", 1),
+    where("approved", "==", false)
     // orderBy("timestamp", "desc")
   );
 
@@ -228,6 +229,7 @@ export async function getUsersByCampusAndRole(campusId: string, role: string) {
   try {
     const usersSnapshots = await getDocsFromCache(userValidatorsRef);
     if (usersSnapshots.empty) throw "no data from cache";
+    if (usersSnapshots.size <= 5) throw "insufficient validators";
     usersSnapshots.forEach((snapshot) => {
       data.push(snapshot.data());
     });
@@ -291,17 +293,34 @@ export async function submitWorkload(
   workloadId: string,
   campusId: string,
   toValidate?: boolean,
-  validatorId?: string
+  validatorId?: string,
+  validators?: any
 ) {
-  console.log(workloadId, campusId);
+  // console.log("submit: ", workloadId, campusId, toValidate, validatorId);
+  // isReadyForApproval(validators);
 
   const workloadRef = doc(db, "workloads", campusId, "workloads", workloadId);
   if (toValidate) {
+    let approved = false;
+    if (isReadyForApproval(validators)) approved = true;
+    console.log(approved, "APPROVED");
+
     await updateDoc(workloadRef, {
       validationProgress: increment(1),
       [`validators.${validatorId}.validated`]: true,
+      approved: approved,
     });
   } else {
     await updateDoc(workloadRef, { validationProgress: increment(1) });
   }
+}
+
+function isReadyForApproval(validators: object) {
+  const validatedArr = Object.values(validators).map(
+    (validator) => validator.validated
+  );
+  const sumValidated = validatedArr.reduce((prev, curr) => prev + curr);
+  console.log(sumValidated, validatedArr);
+
+  return sumValidated + 1 >= validatedArr.length;
 }

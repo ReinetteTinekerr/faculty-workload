@@ -6,6 +6,7 @@ import styles from "styles/Home.module.css";
 import { getDate } from "utils/utils";
 
 export function WorkloadList({ workloads }: any) {
+  //stable
   const { setActiveComponent, setSelectedItem } = useContext(
     ActiveComponentContext
   )!;
@@ -44,7 +45,11 @@ export function WorkloadList({ workloads }: any) {
             }}
           >
             <List.Item.Meta
-              avatar={<Avatar src="https://joeschmoe.io/api/v1/random" />}
+              avatar={
+                <Avatar style={{ background: "#f56a00" }}>
+                  {item.name[0]}
+                </Avatar>
+              }
               title={
                 <a href="">
                   {item.name}, {item.doctorate}
@@ -59,23 +64,36 @@ export function WorkloadList({ workloads }: any) {
                     {new Date(item.schoolYear[1]).getFullYear()}
                   </Tag>
                   <Tag color={"orange"}>{item.college}</Tag>{" "}
-                  <Tag color={"orange"}>{item.campus.toUpperCase()}</Tag>{" "}
+                  <Tag color={"red"}>
+                    Total Faculty Workload: {item.totalFacultyWorkload}
+                  </Tag>
+                  <Tag color={"red"}>
+                    Excess Faculty Workload: {item.excessFacultyWorkload}
+                  </Tag>
+                  {/* <Tag color={"orange"}>{item.campus.toUpperCase()}</Tag>{" "} */}
                   <div>
                     <Row style={{ marginTop: "3px" }}>
                       <Tag color={"geekblue"}>Workloads: </Tag> Undergraduate:{" "}
                       {item.undergraduateSumFTE} units
                       {" | "}Graduate: {item.graduateSumCreditUnits} units
                       {" | "} Research: {item.researchUnitsSum} units
-                      {" | "} Total Faculty Workloads:{" "}
+                      {/* {" | "} Total Faculty Workloads:{" "}
                       {item.totalFacultyWorkload}
+                      {" | "} Excess Faculty Workloads:{" "}
+                      {item.excessFacultyWorkload} */}
                     </Row>
                   </div>
                 </>
               }
             />
-            {/* <List.Item
+            <List.Item
               extra={<WorkloadProgress workload={workloads[index]} />}
-            ></List.Item> */}
+            ></List.Item>
+            {/* <pre>
+              {JSON.stringify(
+                Object.values(workloads[index].validators).length
+              )}
+            </pre> */}
             <List.Item extra={<div>{getDate(item.createdAt)}</div>}></List.Item>
           </List.Item>
         )}
@@ -85,11 +103,12 @@ export function WorkloadList({ workloads }: any) {
 }
 
 function WorkloadProgress({ workload }: any) {
-  const validators = workload.validators;
-  const validationProgress = workload.validationProgress;
+  const validatorsLength = Object.values(workload.validators).length;
+  const validationProgress = workload.validationProgress - 1;
 
-  const len = validators.part1.length + validators.part2.length;
+  const progress = Number(
+    ((validationProgress / validatorsLength) * 100).toFixed(0)
+  );
 
-  const progress = Number(((validationProgress / len) * 100).toFixed(0));
   return <Progress width={35} type="circle" percent={progress} />;
 }

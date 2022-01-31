@@ -157,7 +157,6 @@ async function updateAndUploadValuesToFirestore(
   //   return;
   // }
   const validatorsData = await getUsersByCampusAndRole(campusId, "VALIDATOR");
-  console.log(validatorsData, "campu");
 
   const validators = getValidators(validatorsData, values.college);
 

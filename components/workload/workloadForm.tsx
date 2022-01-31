@@ -16,6 +16,7 @@ import {
   message,
   Card,
   Tag,
+  Tooltip,
 } from "antd";
 import {
   MinusCircleOutlined,
@@ -924,6 +925,22 @@ function PersonalInfo() {
               width: 200,
             }}
             placeholder="Type to select"
+            maxTagCount={11}
+            maxTagPlaceholder={[
+              "fs",
+              "fs",
+              "fs",
+              "afw",
+              "rwre",
+              "rwerew",
+              "a",
+              "ab",
+              "b",
+              "r",
+              "re",
+              "q",
+              "43",
+            ]}
             optionFilterProp="children"
             filterOption={(input, option: any) => {
               return (
@@ -939,10 +956,45 @@ function PersonalInfo() {
                 .localeCompare(optionB.children.toLowerCase())
             }
           >
-            <Option value="CCSICT">CCSICT</Option>
-            <Option value="CAS">CAS</Option>
-            <Option value="COE">COE</Option>
-            <Option value="CBAPA">CBAPA</Option>
+            <Option
+              title="College of Computing Studies, Information and Communication Technology"
+              value="CCSICT"
+            >
+              CCSICT
+            </Option>
+            <Option title="College of Arts and Sciences" value="CAS">
+              CAS
+            </Option>
+            <Option title="College of Engineering" value="COE">
+              CE
+            </Option>
+            <Option
+              title="College of Business, Accountancy and Public Administration"
+              value="CBAPA"
+            >
+              CBAPA
+            </Option>
+            <Option title="College of Agriculture" value="CA">
+              CA
+            </Option>
+            <Option title="School of Veterinary Medicine" value="SVM">
+              SVM
+            </Option>
+            <Option title="College of Criminal Justice Education" value="CCJE">
+              CCJE
+            </Option>
+            <Option title="College of Nursing" value="CN">
+              CN
+            </Option>
+            <Option title="Institute of Fisheries" value="IF">
+              IF
+            </Option>
+            <Option title="Central Graduate School" value="CGS">
+              CGS
+            </Option>
+            <Option title="College of Education" value="CoEd">
+              CoEd
+            </Option>
           </Select>
         </Form.Item>
       </Col>
