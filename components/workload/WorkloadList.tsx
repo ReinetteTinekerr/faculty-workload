@@ -29,7 +29,7 @@ export function WorkloadList({ workloads }: any) {
         // pagination={{
         //   position: "bottom",
         //   onChange: (page) => {
-        //     console.log("log:", page);
+        //
         //   },
         //   pageSize: 5,
         // }}

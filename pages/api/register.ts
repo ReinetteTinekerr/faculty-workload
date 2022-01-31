@@ -32,11 +32,8 @@ export default async function handler(
       password,
     });
 
-    console.log(JSON.stringify(userRecord));
     const uid = userRecord!.uid;
     const campusRef = await addUserToCampus(userData, uid, positionIndex);
-
-    console.log(positionIndex);
 
     const result = await createUserProfile(
       userData,
@@ -47,8 +44,6 @@ export default async function handler(
 
     return res.status(200).json({ user: userRecord });
   } catch (error) {
-    console.log(error);
-
     return res.status(401).json({ error: error });
   }
 }

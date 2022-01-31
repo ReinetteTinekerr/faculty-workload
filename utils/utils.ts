@@ -47,7 +47,7 @@ export function getDate(timestamp: number) {
 //     ),
 //     part2: isuCommittee,
 //   };
-//   console.log("validators", validators);
+//
 
 //   return JSON.parse(JSON.stringify(validators));
 // }
@@ -84,9 +84,6 @@ export function getValidators(validatorsData: any, college: string) {
   //   part2: isuCommittee,
   // };
   const validators = { ...objValidators, ...objValidatorsDean };
-  console.log(validators);
-
-  console.log("validators", validators);
 
   return JSON.parse(JSON.stringify(validators));
 }

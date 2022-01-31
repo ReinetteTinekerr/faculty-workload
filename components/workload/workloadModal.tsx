@@ -80,10 +80,8 @@ export function WorkloadModal({
       );
       message.success("Workload created Woohoo!");
 
-      console.log("Success:", dataWithId);
       return { success: true };
     } catch (errorInfo) {
-      console.log("Failed:", errorInfo);
       return { success: false, errorInfo };
     }
   };
@@ -151,9 +149,9 @@ async function updateAndUploadValuesToFirestore(
 
   // if (campusSnap.exists()) {
   //   campusData = campusSnap.data() as CampusProps;
-  //   console.log(campusData);
+  //
   // } else {
-  //   console.log("No such document!");
+  //
   //   return;
   // }
   const validatorsData = await getUsersByCampusAndRole(campusId, "VALIDATOR");
@@ -169,7 +167,6 @@ async function updateAndUploadValuesToFirestore(
     validators,
     ownerSignature
   );
-  console.log(uploadedWorkload);
 
   return uploadedWorkload;
 }

@@ -21,7 +21,7 @@ const listAllUsers = async (nextPageToken: any) => {
   });
   // adminAuth.listUsers(1000).then((listUsersResult) => {
   //   listUsersResult.users.forEach((userRecord) => {
-  //     console.log(userRecord.toJSON());
+  //
   //     const { displayName, email, metadata, customClaims, uid } = userRecord;
   //     users.push({ displayName, email, metadata, customClaims, uid });
   //   });

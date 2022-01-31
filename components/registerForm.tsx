@@ -33,7 +33,7 @@ export default function RegisterAccount() {
     });
 
     const data = await res.json();
-    console.log(data, "data");
+    
 
     setLoading(false);
     if (res.ok) {
@@ -482,7 +482,7 @@ export default function RegisterAccount() {
               ]}
             >
               <Select
-                onSelect={(data: any) => console.log(data)}
+                onSelect={(data: any) => 
                 disabled={!isItemSelected}
                 showSearch
                 style={{

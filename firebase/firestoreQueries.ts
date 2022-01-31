@@ -51,8 +51,6 @@ export function getDraftsUserWorkloads(
     setWorkloads(() => items);
 
     const source = querySnapshot.metadata.fromCache ? "local cache" : "server";
-
-    console.log("workload Data came from " + source);
   });
   return unsubscribe;
 }
@@ -78,7 +76,6 @@ export function getUserWorkloadsInProgress(
 
     setWorkloadsInProgress(() => items);
     const source = querySnapshot.metadata.fromCache ? "local cache" : "server";
-    console.log("workload In Progress came from " + source);
   });
   return unsubscribe;
 }
@@ -102,8 +99,6 @@ export function getApprovedUserWorkloads(
 
     setApprovedWorkloads(() => items);
     const source = querySnapshot.metadata.fromCache ? "local cache" : "server";
-
-    console.log("Approved workloads  came from " + source);
   });
   return unsubscribe;
 }
@@ -138,8 +133,6 @@ export function getValidatedWorkloads(
   positionIndex: number,
   setValidatedWorkloads: any
 ) {
-  console.log(campusId, positionIndex);
-
   const q = query(
     collection(db, "workloads", campusId, "workloads"),
     where("validationProgress", ">", positionIndex)
@@ -151,7 +144,6 @@ export function getValidatedWorkloads(
     });
     setValidatedWorkloads(() => items);
     const source = querySnapshot.metadata.fromCache ? "local cache" : "server";
-    console.log("workload In Progress came from " + source);
   });
 }
 
@@ -234,8 +226,7 @@ export async function getUsersByCampusAndRole(campusId: string, role: string) {
       data.push(snapshot.data());
     });
 
-    console.log("validators from cache");
-    // console.log(usersSnapshots.metadata);
+    //
 
     return data;
   } catch (error) {
@@ -257,11 +248,8 @@ export async function getUserProfileFromCacheElseServer(
     try {
       const userSnap = await getDoc(userRef);
       if (userSnap.exists()) {
-        console.log(userSnap.metadata);
-        console.log("Document data:", userSnap.data());
         return userSnap.data();
       } else {
-        console.log("No such document!");
         return null;
       }
     } catch (error) {
@@ -270,19 +258,16 @@ export async function getUserProfileFromCacheElseServer(
   } else {
     try {
       const doc = await getDocFromCache(userRef);
-      console.log(doc.metadata, "from cache user");
+
       // doc.metadata.hasPendingWrites
-      // console.log(doc.data());
+      //
 
       return doc.data();
     } catch (error) {
       const userSnap = await getDoc(userRef);
       if (userSnap.exists()) {
-        console.log(userSnap.metadata);
-        console.log("Document data:", userSnap.data());
         return userSnap.data();
       } else {
-        console.log("No such document!");
         return null;
       }
     }
@@ -296,14 +281,13 @@ export async function submitWorkload(
   validatorId?: string,
   validators?: any
 ) {
-  // console.log("submit: ", workloadId, campusId, toValidate, validatorId);
+  //
   // isReadyForApproval(validators);
 
   const workloadRef = doc(db, "workloads", campusId, "workloads", workloadId);
   if (toValidate) {
     let approved = false;
     if (isReadyForApproval(validators)) approved = true;
-    console.log(approved, "APPROVED");
 
     await updateDoc(workloadRef, {
       validationProgress: increment(1),
@@ -320,7 +304,6 @@ function isReadyForApproval(validators: object) {
     (validator) => validator.validated
   );
   const sumValidated = validatedArr.reduce((prev, curr) => prev + curr);
-  console.log(sumValidated, validatedArr);
 
   return sumValidated + 1 >= validatedArr.length;
 }

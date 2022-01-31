@@ -59,7 +59,7 @@ import TableDataContext from "context/tableContext";
 //   };
 
 //   const save = async () => {
-//     console.log("save");
+//
 
 //     try {
 //       const values = await form.validateFields();
@@ -67,7 +67,7 @@ import TableDataContext from "context/tableContext";
 //       // toggleEdit();
 //       handleSave({ ...record, ...values });
 //     } catch (errInfo) {
-//       console.log("Save failed:", errInfo);
+//
 //     }
 //   };
 
@@ -159,7 +159,7 @@ import TableDataContext from "context/tableContext";
 //       schedule: "SCHEDULE",
 //       rooms: "ROOM",
 //     };
-//     console.log(data);
+//
 
 //     setData([...data, newData]);
 //   };
@@ -168,7 +168,7 @@ import TableDataContext from "context/tableContext";
 //     const newData = data;
 //     const index = newData.findIndex((item) => row.key === item.key);
 //     let item = newData[index];
-//     console.log("lec", Number(item.lecHours));
+//
 //     const lectureFTE = Number(item.lecHours);
 //     const labFTE = Number(item.labHours);
 //     const totalFTE = lectureFTE + labFTE;
@@ -178,7 +178,7 @@ import TableDataContext from "context/tableContext";
 //       labFTE: labFTE,
 //       totalFTE: totalFTE,
 //     };
-//     console.log(item);
+//
 
 //     newData.splice(index, 1, { ...item, ...row });
 //     setData([...newData]);
@@ -448,12 +448,9 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
       toggleEdit();
       handleSave({ ...record, ...values });
-      console.log("SAVE");
 
       // setUndergraduateTableData({ ...record, ...values });
-    } catch (errInfo) {
-      console.log("Save failed:", errInfo);
-    }
+    } catch (errInfo) {}
   };
 
   let childNode = children;
@@ -737,7 +734,6 @@ export class UndergraduateEditableTable extends React.Component<
     const labFTE = Number(row.labHours);
     const totalFTE = lectureFTE + labFTE;
     const newItem = { ...row, lectureFTE, labFTE, totalFTE };
-    console.log(newItem);
 
     const index = newData.findIndex((item) => item.key == newItem.key);
     newData.splice(index, 1, { ...newItem });

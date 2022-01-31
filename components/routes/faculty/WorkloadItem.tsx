@@ -245,7 +245,7 @@ function NameTitleSignatureField({
   span,
   owner,
 }: NameTitleSignatureProps) {
-  // console.log("SIGNATURE", signature, name);
+  //
 
   return (
     <Row style={{ position: "relative", bottom: "10px" }}>
@@ -723,8 +723,6 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
   const validators = Object.values(withUIDValidators).sort(
     (a: any, b: any) => a.positionIndex - b.positionIndex
   );
-
-  console.log(validators, "dators");
 
   // const sortedValidators = workload.validators.sort(
   //   (a: any, b: any) => a.positionIndex - b.positionIndex

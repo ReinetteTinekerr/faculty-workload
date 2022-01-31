@@ -33,8 +33,6 @@ export async function verifyEmail(user: User | null | undefined) {
     };
     try {
       await sendEmailVerification(user, actionCodeSettings);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 }

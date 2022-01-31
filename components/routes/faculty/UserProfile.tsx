@@ -66,9 +66,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
   const handleCancel = () => {
     setIsProfileModalVisible(false);
   };
-  const onFinish = (values: any) => {
-    console.log("Success:", values);
-  };
+  const onFinish = (values: any) => {};
   return (
     <Layout
       style={{
@@ -184,12 +182,10 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
                   const urlWithoutToken = url.split("&token")[0];
 
                   if (signature === undefined) {
-                    console.log("updated");
-
                     await updateUserSignature(uid, urlWithoutToken);
                     await getUserProfileFromCacheElseServer(uid, true);
                   }
-                  // console.log(url);
+                  //
 
                   setIsSignatureSaving(false);
                   setEditSignature(false);
@@ -244,7 +240,6 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
               onClick={async () => {
                 try {
                   const values = await form.validateFields();
-                  console.log(values);
                 } catch (error) {}
                 // setLoading(true);
                 // const { success } = await onCheck();

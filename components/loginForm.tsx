@@ -18,8 +18,6 @@ export function LoginForm(props: any) {
         setLoading(false);
 
         if (error) {
-          console.log(errorMsg.code);
-
           switch (errorMsg.code) {
             case "auth/too-many-requests":
               message.error("Too many request");

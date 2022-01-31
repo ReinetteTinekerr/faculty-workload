@@ -67,7 +67,6 @@ const props = {
   },
   onChange(info: any) {
     if (info.file.status !== "uploading") {
-      console.log(info.file, info.fileList);
     }
     if (info.file.status === "done") {
       message.success(`${info.file.name} file uploaded successfully`);
@@ -1059,9 +1058,7 @@ function Administration() {
       }
       return isPNG && isLt5M;
     },
-    onChange: (info: any) => {
-      console.log(info.fileList);
-    },
+    onChange: (info: any) => {},
   };
   return (
     <Row>
@@ -1096,7 +1093,7 @@ function Administration() {
 
 const ResearchAndProductionInputs: React.FC<Props> = ({ name }) => {
   // const onFinish = (values: any) => {
-  //   console.log("Received values of form:", values);
+  //
   // };
   const gridStyle = {
     width: "25%",

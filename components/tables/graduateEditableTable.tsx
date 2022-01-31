@@ -77,7 +77,7 @@ const { Text } = Typography;
 //       toggleEdit();
 //       handleSave({ ...record, ...values });
 //     } catch (errInfo) {
-//       console.log("Save failed:", errInfo);
+//
 //     }
 //   };
 
@@ -187,7 +187,7 @@ const { Text } = Typography;
 //       labUnits: 0,
 //       lectureUnits: 0,
 //     };
-//     console.log(data);
+//
 
 //     setData([...data, newData]);
 //   };
@@ -420,12 +420,9 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
       toggleEdit();
       handleSave({ ...record, ...values });
-      console.log("SAVE");
 
       setGraduateTableData({ ...record, ...values });
-    } catch (errInfo) {
-      console.log("Save failed:", errInfo);
-    }
+    } catch (errInfo) {}
   };
 
   let childNode = children;
@@ -658,7 +655,7 @@ export class GraduateEditableTable extends React.Component<
     // item = {
     //   ...item,
     // };
-    // console.log(item);
+    //
 
     // newData.splice(index, 1, {
     //   ...item,
