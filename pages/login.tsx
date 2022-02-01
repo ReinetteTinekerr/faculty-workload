@@ -26,7 +26,7 @@ const Login: NextPage = () => {
       {/* <Layout style={{ minHeight: "100vh" }}> */}
       {/* <WorkloadHeader user={null} /> */}
 
-      <WorkloadLayout>
+      <WorkloadLayout headerTitle="Sign In | Faculty Workload">
         <Content
           style={{
             display: "flex",

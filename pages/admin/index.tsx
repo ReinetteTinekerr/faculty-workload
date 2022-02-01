@@ -72,7 +72,8 @@ const Admin: NextPage = () => {
     loading ||
     userRole === null ||
     firebaseUsers === null ||
-    userData === null
+    userData === null ||
+    !validators
   ) {
     return <LoadingScreen />;
   }
