@@ -94,15 +94,6 @@ const Admin: NextPage = () => {
 
   return (
     <>
-      <Head>
-        <title>ISU Workload Admin</title>
-        <meta
-          name="description"
-          content="This project was developed by BSCS Students from ISU Echague"
-        />
-        <link rel="icon" href="/isu-logo.ico" />
-      </Head>
-
       <WorkloadLayout headerTitle="Dashboard | Admin">
         <Layout style={{ width: "90%", margin: "auto", background: "#fff" }}>
           <Content style={{ overflow: "auto" }}>

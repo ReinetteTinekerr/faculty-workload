@@ -711,10 +711,6 @@ class WorkloadFormToPrint extends Component<{
   }
 }
 
-interface WorkloadItemProps {
-  selectedItem: WorkloadDataProps;
-}
-
 function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
   const [_, __, ___, ____, userData] = useAuthSession();
 

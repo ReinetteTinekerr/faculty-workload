@@ -51,6 +51,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
     uid,
     signature,
   } = userData!;
+  const [userSignature, setUserSignature] = useState(signature);
 
   const showProfileModal = () => {
     setIsProfileModalVisible(true);
@@ -185,7 +186,9 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
                     await updateUserSignature(uid, urlWithoutToken);
                     await getUserProfileFromCacheElseServer(uid, true);
                   }
-                  //
+
+                  setUserSignature(url);
+                  console.log(url, "url", userSignature);
 
                   setIsSignatureSaving(false);
                   setEditSignature(false);
@@ -207,7 +210,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
               <Image
                 width={300}
                 alt="Signature"
-                src={signature}
+                src={userSignature}
                 // placeholder={true}
               />
             </div>
