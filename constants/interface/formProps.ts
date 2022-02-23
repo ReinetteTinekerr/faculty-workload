@@ -10,7 +10,7 @@ export interface WorkloadDataProps {
   createdAt?: any;
   name: string;
   semester: string;
-  schoolYear: [string, string];
+  schoolYear: [string, string] | string;
   baccalaureate: string;
   masteral: string;
   doctorate: string;
@@ -27,6 +27,7 @@ export interface WorkloadDataProps {
   researchUnitsSum?: number;
   excessFacultyWorkload?: number;
   extensionProductionSum?: number;
+  positionUnits: number;
 }
 
 export interface WorkloadToUploadProps {

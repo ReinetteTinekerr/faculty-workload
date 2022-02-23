@@ -1,6 +1,4 @@
-import type { NextPage } from "next";
-
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import {
   Form,
   Input,
@@ -25,6 +23,7 @@ import {
 } from "@ant-design/icons";
 
 import { WorkloadFormContext } from "./workloadModal";
+import { UserProfileProps } from "constants/interface/formProps";
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -75,41 +74,6 @@ const props = {
     }
   },
 };
-
-const residences = [
-  {
-    value: "zhejiang",
-    label: "Zhejiang",
-    children: [
-      {
-        value: "hangzhou",
-        label: "Hangzhou",
-        children: [
-          {
-            value: "xihu",
-            label: "West Lake",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    value: "jiangsu",
-    label: "Jiangsu",
-    children: [
-      {
-        value: "nanjing",
-        label: "Nanjing",
-        children: [
-          {
-            value: "zhonghuamen",
-            label: "Zhong Hua Men",
-          },
-        ],
-      },
-    ],
-  },
-];
 
 function DataItemField({
   label,
@@ -165,10 +129,9 @@ function DataItemField({
 function GraduateFormList() {
   return (
     <Row justify="center">
-      {" "}
       <Form.List name="graduate">
         {(fields, { add, remove }) => (
-          <div>
+          <>
             {fields.map(({ key, name, ...restField }) => (
               <Row
                 key={key}
@@ -188,7 +151,7 @@ function GraduateFormList() {
                 />
                 <DataItemField
                   name1={name}
-                  span={5}
+                  span={7}
                   restField={restField}
                   label="Course Description"
                   name2={"courseDescription"}
@@ -342,7 +305,7 @@ function GraduateFormList() {
                     margin: "10px",
                     // marginTop: "10px",
                     // marginRight: "20px",
-                    fontSize: "18px",
+                    fontSize: "25px",
                     color: "red",
                   }}
                   onClick={() => remove(name)}
@@ -354,13 +317,12 @@ function GraduateFormList() {
               <Button
                 type="dashed"
                 onClick={() => add()}
-                block
                 icon={<PlusOutlined />}
               >
                 Add field
               </Button>
             </Form.Item>
-          </div>
+          </>
         )}
       </Form.List>
     </Row>
@@ -368,20 +330,12 @@ function GraduateFormList() {
 }
 
 function UnderGraduateFormList() {
-  // const [labHoursList, setLabHoursList] = useState<number[]>([]);
-  // const [lecHoursList, setLecHoursList] = useState<number[]>([]);
-  // const [totalFTEList, setTotalFTEList] = useState<number[]>([]);
-  // const [key, setKey] = useState<number>(0);
-  const form = useContext(WorkloadFormContext);
-
-  // useEffect(() => {}, [labHoursList, lecHoursList]);
-
   return (
     <Row justify="center">
       {" "}
       <Form.List name="undergraduate">
         {(fields, { add, remove }) => (
-          <div style={{}}>
+          <>
             {fields.map(({ key, name, ...restField }) => (
               <Row
                 key={key}
@@ -402,7 +356,7 @@ function UnderGraduateFormList() {
                 />
                 <DataItemField
                   name1={name}
-                  span={5}
+                  span={7}
                   restField={restField}
                   label="DESCRIPTIVE TITLE"
                   name2={"descriptiveTitle"}
@@ -544,7 +498,7 @@ function UnderGraduateFormList() {
 
                 <DataItemField
                   name1={name}
-                  span={3}
+                  span={5}
                   restField={restField}
                   label="SCHEDULE"
                   name2={"schedule"}
@@ -589,7 +543,7 @@ function UnderGraduateFormList() {
                 />
                 <DataItemField
                   name1={name}
-                  span={3}
+                  span={2}
                   restField={restField}
                   label="LEC FTE"
                   // name2={"lecFTE"}
@@ -604,7 +558,7 @@ function UnderGraduateFormList() {
                   name1={name}
                   name2="labHours"
                   // name2={"labFTE"}
-                  span={3}
+                  span={2}
                   restField={restField}
                   label="LAB FTE"
                   message="Missing FTE LAB"
@@ -635,7 +589,7 @@ function UnderGraduateFormList() {
                     margin: "10px",
                     // marginTop: "10px",
                     // marginRight: "20px",
-                    fontSize: "18px",
+                    fontSize: "25px",
                     color: "red",
                   }}
                   onClick={() => remove(name)}
@@ -646,23 +600,20 @@ function UnderGraduateFormList() {
             <Form.Item>
               <Button
                 type="dashed"
-                onClick={() => {
-                  add();
-                }}
-                block
+                onClick={() => add()}
                 icon={<PlusOutlined />}
               >
                 Add field
               </Button>
             </Form.Item>
-          </div>
+          </>
         )}
       </Form.List>
     </Row>
   );
 }
 
-const WorkloadForm: NextPage = () => {
+const WorkloadForm = () => {
   return (
     <>
       <PersonalInfo />
@@ -686,63 +637,389 @@ const WorkloadForm: NextPage = () => {
 };
 
 function PersonalInfo() {
+  // console.log(facultyMembers.length, "members");
+  const { form, facultyMembers } = useContext(WorkloadFormContext);
+
   return (
-    <Row justify="center">
-      <Col span={10}>
-        <Form.Item
-          name="semester"
-          label="Semester/ Summer"
-          rules={[
-            {
-              required: true,
-              message: "Please select your semester",
-            },
-          ]}
-        >
-          <Select
-            placeholder="Select semester"
-            style={{
-              width: 200,
-            }}
+    <>
+      <Row justify="center">
+        <Col span={10}>
+          <Form.Item
+            name="semester"
+            label="Semester/ Summer"
+            rules={[
+              {
+                required: true,
+                message: "Please select your semester",
+              },
+            ]}
           >
-            <Option value="First Semester">FIRST SEMESTER</Option>
-            <Option value="Second Semester">SECOND SEMESTER</Option>
-            <Option value="Summer">SUMMER</Option>
-          </Select>
-        </Form.Item>
+            <Select
+              placeholder="Select semester"
+              style={{
+                width: 200,
+              }}
+            >
+              <Option value="First Semester">FIRST SEMESTER</Option>
+              <Option value="Second Semester">SECOND SEMESTER</Option>
+              <Option value="Summer">SUMMER</Option>
+            </Select>
+          </Form.Item>
 
+          {!facultyMembers ? (
+            <Form.Item
+              name="name"
+              label="Name"
+              rules={[
+                {
+                  required: true,
+                  message: "Please input your name!",
+                  whitespace: true,
+                },
+              ]}
+            >
+              <Input
+                disabled
+                style={{
+                  width: 200,
+                  textTransform: "capitalize",
+                }}
+              />
+            </Form.Item>
+          ) : (
+            <Form.Item
+              name="name"
+              label="Name"
+              rules={[
+                {
+                  required: true,
+                  message: "Please select a faculty member", // type: "array",
+                },
+              ]}
+            >
+              <Select
+                showSearch
+                style={{
+                  width: 200,
+                }}
+                placeholder="Type to select"
+                optionFilterProp="children"
+                onSelect={(selected) => {
+                  // console.log(selected);
+                  const member = facultyMembers.filter(
+                    (member: any) => member.username == selected
+                  )[0];
+                  console.log(member);
+
+                  form?.setFieldsValue({
+                    name: member?.username,
+                    masteral: member?.masteral,
+                    college: member?.college,
+                    campus: member?.campus,
+                    doctorate: member?.doctorate,
+                    baccalaureate: member?.baccalaureate,
+                  });
+                }}
+                filterOption={(input, option: any) => {
+                  return (
+                    option?.children
+                      ?.toString()
+                      .toLowerCase()
+                      .indexOf(input.toLowerCase()) >= 0
+                  );
+                }}
+                filterSort={(optionA, optionB) =>
+                  optionA.children
+                    .toLowerCase()
+                    .localeCompare(optionB.children.toLowerCase())
+                }
+              >
+                {facultyMembers.map((member: any) => {
+                  return (
+                    <Option key={member.uid} value={member.username}>
+                      {member.username}
+                    </Option>
+                  );
+                })}
+              </Select>
+            </Form.Item>
+          )}
+
+          <Form.Item
+            name="baccalaureate"
+            label="Baccalaureate Degree"
+            rules={[
+              {
+                required: true,
+                message: "Please select your favourite colors!", // type: "array",
+              },
+            ]}
+          >
+            <Select
+              disabled
+              showSearch
+              style={{
+                width: 200,
+              }}
+              placeholder="Type to select"
+              optionFilterProp="children"
+              filterOption={(input, option: any) => {
+                return (
+                  option?.children
+                    ?.toString()
+                    .toLowerCase()
+                    .indexOf(input.toLowerCase()) >= 0
+                );
+              }}
+              filterSort={(optionA, optionB) =>
+                optionA.children
+                  .toLowerCase()
+                  .localeCompare(optionB.children.toLowerCase())
+              }
+            >
+              <Option value="BSCS">BSCS</Option>
+              <Option value="BSIT">BSIT</Option>
+              <Option value="BSIS">BSIS</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="masteral"
+            label="Masteral Degree"
+            rules={[
+              {
+                required: true,
+                message: "Missing Masteral Degree", // type: "array",
+              },
+            ]}
+          >
+            <Select
+              disabled
+              showSearch
+              style={{
+                width: 200,
+              }}
+              placeholder="Type to select"
+              optionFilterProp="children"
+              filterOption={(input, option: any) => {
+                return (
+                  option?.children
+                    ?.toString()
+                    .toLowerCase()
+                    .indexOf(input.toLowerCase()) >= 0
+                );
+              }}
+              filterSort={(optionA, optionB) =>
+                optionA.children
+                  .toLowerCase()
+                  .localeCompare(optionB.children.toLowerCase())
+              }
+            >
+              <Option value="MIT">MIT</Option>
+              <Option value=" ">NONE</Option>
+            </Select>
+          </Form.Item>
+        </Col>
+        <Col>
+          <Form.Item
+            name="doctorate"
+            label="Doctorate Degree"
+            rules={[
+              {
+                required: true,
+                message: "Missing Doctorate Degree", // type: "array",
+              },
+            ]}
+          >
+            <Select
+              disabled
+              showSearch
+              style={{
+                width: 200,
+              }}
+              placeholder="Type to select"
+              optionFilterProp="children"
+              filterOption={(input, option: any) => {
+                return (
+                  option?.children
+                    ?.toString()
+                    .toLowerCase()
+                    .indexOf(input.toLowerCase()) >= 0
+                );
+              }}
+              filterSort={(optionA, optionB) =>
+                optionA.children
+                  .toLowerCase()
+                  .localeCompare(optionB.children.toLowerCase())
+              }
+            >
+              <Option value="DIT">DIT</Option>
+              <Option value=" ">NONE</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="schoolYear"
+            label="School Year"
+            rules={[
+              {
+                required: true,
+                message: "Please select school year",
+                type: "array",
+              },
+            ]}
+          >
+            <RangePicker
+              style={{
+                width: 200,
+              }}
+              picker="year"
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="campus"
+            label="Campus"
+            rules={[
+              {
+                required: true,
+                message: "Please select your favourite colors!",
+              },
+            ]}
+          >
+            <Select
+              showSearch
+              disabled
+              style={{
+                width: 200,
+              }}
+              placeholder="Type to select"
+              optionFilterProp="children"
+              filterOption={(input, option: any) => {
+                return (
+                  option?.children
+                    ?.toString()
+                    .toLowerCase()
+                    .indexOf(input.toLowerCase()) >= 0
+                );
+              }}
+              filterSort={(optionA, optionB) =>
+                optionA.children
+                  .toLowerCase()
+                  .localeCompare(optionB.children.toLowerCase())
+              }
+            >
+              <Option value="Echague Campus">Echague Campus</Option>
+              <Option value="Cauayan Campus">Cauyan Campus</Option>
+              <Option value="Cabagan Campus">Cabagan Campus</Option>
+              <Option value="Ilagan Campus">Ilagan Campus</Option>
+              <Option value="Roxas Campus">Roxas Campus</Option>
+              <Option value="Angadanan Campus">Angadanan Campus</Option>
+              <Option value="Jones Campus">Jones Campus</Option>
+              <Option value="San Mateo Campus">San Mateo Campus</Option>
+              <Option value="San Mariano Campus">San Mariano Campus</Option>
+              <Option value="Santiago Campus">Santiago Extension Campus</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="college"
+            label="College"
+            rules={[
+              {
+                required: true,
+                message: "Please select your favourite colors!",
+              },
+            ]}
+          >
+            <Select
+              disabled
+              showSearch
+              style={{
+                width: 200,
+              }}
+              placeholder="Type to select"
+              maxTagCount={11}
+              optionFilterProp="children"
+              filterOption={(input, option: any) => {
+                return (
+                  option?.children
+                    ?.toString()
+                    .toLowerCase()
+                    .indexOf(input.toLowerCase()) >= 0
+                );
+              }}
+              filterSort={(optionA, optionB) =>
+                optionA.children
+                  .toLowerCase()
+                  .localeCompare(optionB.children.toLowerCase())
+              }
+            >
+              <Option
+                title="College of Computing Studies, Information and Communication Technology"
+                value="CCSICT"
+              >
+                CCSICT
+              </Option>
+              <Option title="College of Arts and Sciences" value="CAS">
+                CAS
+              </Option>
+              <Option title="College of Engineering" value="COE">
+                CE
+              </Option>
+              <Option
+                title="College of Business, Accountancy and Public Administration"
+                value="CBAPA"
+              >
+                CBAPA
+              </Option>
+              <Option title="College of Agriculture" value="CA">
+                CA
+              </Option>
+              <Option title="School of Veterinary Medicine" value="SVM">
+                SVM
+              </Option>
+              <Option
+                title="College of Criminal Justice Education"
+                value="CCJE"
+              >
+                CCJE
+              </Option>
+              <Option title="College of Nursing" value="CN">
+                CN
+              </Option>
+              <Option title="Institute of Fisheries" value="IF">
+                IF
+              </Option>
+              <Option title="Central Graduate School" value="CGS">
+                CGS
+              </Option>
+              <Option title="College of Education" value="CoEd">
+                CoEd
+              </Option>
+            </Select>
+          </Form.Item>
+        </Col>
+      </Row>
+      <Row justify="center">
         <Form.Item
-          name="name"
-          label="Name"
+          // labelCol={{
+          //   span: 11,
+          // }}
+          // wrapperCol={{
+          //   span: 24,
+          // }}
+          name="programChair"
+          label="Program Chair"
           rules={[
             {
               required: true,
-              message: "Please input your name!",
-              whitespace: true,
-            },
-          ]}
-        >
-          <Input
-            disabled
-            style={{
-              width: 200,
-              textTransform: "capitalize",
-            }}
-          />
-        </Form.Item>
-
-        <Form.Item
-          name="baccalaureate"
-          label="Baccalaureate Degree"
-          rules={[
-            {
-              required: true,
-              message: "Please select your favourite colors!", // type: "array",
+              message:
+                "Please select a program chair for workload verification", // type: "array",
             },
           ]}
         >
           <Select
-            disabled
             showSearch
             style={{
               width: 200,
@@ -768,236 +1045,8 @@ function PersonalInfo() {
             <Option value="BSIS">BSIS</Option>
           </Select>
         </Form.Item>
-
-        <Form.Item
-          name="masteral"
-          label="Masteral Degree"
-          rules={[
-            {
-              required: true,
-              message: "Please select your favourite colors!", // type: "array",
-            },
-          ]}
-        >
-          <Select
-            disabled
-            showSearch
-            style={{
-              width: 200,
-            }}
-            placeholder="Type to select"
-            optionFilterProp="children"
-            filterOption={(input, option: any) => {
-              return (
-                option?.children
-                  ?.toString()
-                  .toLowerCase()
-                  .indexOf(input.toLowerCase()) >= 0
-              );
-            }}
-            filterSort={(optionA, optionB) =>
-              optionA.children
-                .toLowerCase()
-                .localeCompare(optionB.children.toLowerCase())
-            }
-          >
-            <Option value="MIT">MIT</Option>
-            <Option value="">NONE</Option>
-          </Select>
-        </Form.Item>
-      </Col>
-      <Col>
-        <Form.Item
-          name="doctorate"
-          label="Doctorate Degree"
-          rules={[
-            {
-              required: true,
-              message: "Please select your favourite colors!", // type: "array",
-            },
-          ]}
-        >
-          <Select
-            disabled
-            showSearch
-            style={{
-              width: 200,
-            }}
-            placeholder="Type to select"
-            optionFilterProp="children"
-            filterOption={(input, option: any) => {
-              return (
-                option?.children
-                  ?.toString()
-                  .toLowerCase()
-                  .indexOf(input.toLowerCase()) >= 0
-              );
-            }}
-            filterSort={(optionA, optionB) =>
-              optionA.children
-                .toLowerCase()
-                .localeCompare(optionB.children.toLowerCase())
-            }
-          >
-            <Option value="DIT">DIT</Option>
-            <Option value="">NONE</Option>
-          </Select>
-        </Form.Item>
-
-        <Form.Item
-          name="schoolYear"
-          label="School Year"
-          rules={[
-            {
-              required: true,
-              message: "Please select school year",
-              type: "array",
-            },
-          ]}
-        >
-          <RangePicker
-            style={{
-              width: 200,
-            }}
-            picker="year"
-          />
-        </Form.Item>
-
-        <Form.Item
-          name="campus"
-          label="Campus"
-          rules={[
-            {
-              required: true,
-              message: "Please select your favourite colors!",
-            },
-          ]}
-        >
-          <Select
-            showSearch
-            disabled
-            style={{
-              width: 200,
-            }}
-            placeholder="Type to select"
-            optionFilterProp="children"
-            filterOption={(input, option: any) => {
-              return (
-                option?.children
-                  ?.toString()
-                  .toLowerCase()
-                  .indexOf(input.toLowerCase()) >= 0
-              );
-            }}
-            filterSort={(optionA, optionB) =>
-              optionA.children
-                .toLowerCase()
-                .localeCompare(optionB.children.toLowerCase())
-            }
-          >
-            <Option value="Echague Campus">Echague Campus</Option>
-            <Option value="Cauayan Campus">Cauyan Campus</Option>
-            <Option value="Cabagan Campus">Cabagan Campus</Option>
-            <Option value="Ilagan Campus">Ilagan Campus</Option>
-            <Option value="Roxas Campus">Roxas Campus</Option>
-            <Option value="Angadanan Campus">Angadanan Campus</Option>
-            <Option value="Jones Campus">Jones Campus</Option>
-            <Option value="San Mateo Campus">San Mateo Campus</Option>
-            <Option value="San Mariano Campus">San Mariano Campus</Option>
-            <Option value="Santiago Campus">Santiago Extension Campus</Option>
-          </Select>
-        </Form.Item>
-
-        <Form.Item
-          name="college"
-          label="College"
-          rules={[
-            {
-              required: true,
-              message: "Please select your favourite colors!",
-            },
-          ]}
-        >
-          <Select
-            showSearch
-            style={{
-              width: 200,
-            }}
-            placeholder="Type to select"
-            maxTagCount={11}
-            maxTagPlaceholder={[
-              "fs",
-              "fs",
-              "fs",
-              "afw",
-              "rwre",
-              "rwerew",
-              "a",
-              "ab",
-              "b",
-              "r",
-              "re",
-              "q",
-              "43",
-            ]}
-            optionFilterProp="children"
-            filterOption={(input, option: any) => {
-              return (
-                option?.children
-                  ?.toString()
-                  .toLowerCase()
-                  .indexOf(input.toLowerCase()) >= 0
-              );
-            }}
-            filterSort={(optionA, optionB) =>
-              optionA.children
-                .toLowerCase()
-                .localeCompare(optionB.children.toLowerCase())
-            }
-          >
-            <Option
-              title="College of Computing Studies, Information and Communication Technology"
-              value="CCSICT"
-            >
-              CCSICT
-            </Option>
-            <Option title="College of Arts and Sciences" value="CAS">
-              CAS
-            </Option>
-            <Option title="College of Engineering" value="COE">
-              CE
-            </Option>
-            <Option
-              title="College of Business, Accountancy and Public Administration"
-              value="CBAPA"
-            >
-              CBAPA
-            </Option>
-            <Option title="College of Agriculture" value="CA">
-              CA
-            </Option>
-            <Option title="School of Veterinary Medicine" value="SVM">
-              SVM
-            </Option>
-            <Option title="College of Criminal Justice Education" value="CCJE">
-              CCJE
-            </Option>
-            <Option title="College of Nursing" value="CN">
-              CN
-            </Option>
-            <Option title="Institute of Fisheries" value="IF">
-              IF
-            </Option>
-            <Option title="Central Graduate School" value="CGS">
-              CGS
-            </Option>
-            <Option title="College of Education" value="CoEd">
-              CoEd
-            </Option>
-          </Select>
-        </Form.Item>
-      </Col>
-    </Row>
+      </Row>
+    </>
   );
 }
 
@@ -1065,28 +1114,62 @@ function Administration() {
       <Divider orientation="left" orientationMargin="0">
         E. Administration
       </Divider>
-      <Form.Item
-        label="Position"
-        name="position"
-        rules={[
-          {
-            required: true,
-            message: "Please fill in your position",
-          },
-        ]}
-      >
-        <Input
-          style={{
-            width: 150,
-            textTransform: "capitalize",
+      <Col style={{ paddingRight: "4px" }}>
+        <Form.Item
+          label="Position"
+          name="position"
+          labelCol={{
+            span: 34,
           }}
-        />
-      </Form.Item>
-      <Form.Item label="Proof">
-        <Upload {...props} listType="picture" maxCount={1}>
-          <Button icon={<UploadOutlined />}>Click to Upload</Button>
-        </Upload>
-      </Form.Item>
+          wrapperCol={{
+            span: 24,
+          }}
+          // rules={[
+          //   {
+          //     required: true,
+          //     message: "Please fill in your position",
+          //   },
+          // ]}
+        >
+          <Input
+            style={{
+              width: 180,
+              textTransform: "capitalize",
+            }}
+          />
+        </Form.Item>
+      </Col>
+      <Col style={{ paddingRight: "4px" }}>
+        <Form.Item
+          labelCol={{
+            span: 34,
+          }}
+          wrapperCol={{
+            span: 24,
+          }}
+          name={["positionUnits"]}
+          // rules={[
+          //   { required: true, message: "Missing position units" },
+          // ]}
+          label="Units"
+        >
+          <InputNumber min={0} max={20} defaultValue={0} />
+        </Form.Item>
+      </Col>
+      <Col>
+        <Form.Item
+          labelCol={{
+            span: 34,
+          }}
+          wrapperCol={{
+            span: 24,
+          }}
+        >
+          <Upload {...props} listType="picture" maxCount={1}>
+            <Button icon={<UploadOutlined />}>Click to Upload</Button>
+          </Upload>
+        </Form.Item>
+      </Col>
     </Row>
   );
 }
@@ -1108,7 +1191,7 @@ const ResearchAndProductionInputs: React.FC<Props> = ({ name }) => {
             {fields.map(({ key, name, ...restField }) => (
               <Row align="middle" key={key}>
                 <Row>
-                  <Card size="default">
+                  <Card>
                     <Row>
                       <Col span={18}>
                         <Form.Item
@@ -1117,7 +1200,7 @@ const ResearchAndProductionInputs: React.FC<Props> = ({ name }) => {
                           rules={[{ required: true, message: "Missing title" }]}
                           label="Title"
                         >
-                          <Input placeholder="" style={{ width: "150px" }} />
+                          <Input placeholder="" style={{ width: "200px" }} />
                         </Form.Item>
                         <Form.Item
                           {...restField}
@@ -1133,7 +1216,7 @@ const ResearchAndProductionInputs: React.FC<Props> = ({ name }) => {
                           rules={[{ required: true, message: "Missing role" }]}
                           label="Role"
                         >
-                          <Input placeholder="" style={{ width: "150px" }} />
+                          <Input placeholder="" style={{ width: "200px" }} />
                         </Form.Item>
                         <Form.Item
                           {...restField}
@@ -1164,7 +1247,7 @@ const ResearchAndProductionInputs: React.FC<Props> = ({ name }) => {
                     margin: "10px",
                     // marginTop: "10px",
                     // marginRight: "20px",
-                    fontSize: "18px",
+                    fontSize: "25px",
                     color: "red",
                   }}
                   onClick={() => remove(name)}

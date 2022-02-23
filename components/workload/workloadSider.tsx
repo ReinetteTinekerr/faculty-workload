@@ -41,7 +41,7 @@ export function ProgressSider({ validators, validationProgress }: any) {
       title="Workload Validators"
       style={{
         padding: "20px",
-        overflow: "auto",
+        overflowY: "auto",
         // height: "100vh",
         // position: "fixed",
         // left: 0,

@@ -30,18 +30,31 @@ export async function deleteWorkload(workloadId: string, campusId: string) {
   await deleteDoc(workloadRef);
 }
 
-export function getDraftsUserWorkloads(
+export function getWorkloadsBySchoolYear(
   userId: string,
   campusId: string,
-  setWorkloads: any
+  setWorkloads: any,
+  role: string,
+  college: string,
+  schoolYear: string
 ) {
-  const q = query(
-    collection(db, "workloads", campusId, "workloads"),
-    where("createdBy", "==", userId),
-    where("validationProgress", "==", 0),
-    orderBy("timestamp", "desc"),
-    limit(10)
-  );
+  const q =
+    role == "FACULTY"
+      ? query(
+          collection(db, "workloads", campusId, "workloads"),
+          where("createdBy", "==", userId),
+          where("workload.schoolYear", "==", schoolYear),
+          // where("validationProgress", "==", 0),
+          orderBy("timestamp", "desc"),
+          limit(3)
+        )
+      : query(
+          collection(db, "workloads", campusId, "workloads"),
+          where("workload.college", "==", college),
+          where("workload.schoolYear", "==", schoolYear),
+          orderBy("timestamp", "desc"),
+          limit(120)
+        );
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
     const items: any = [];
     querySnapshot.forEach((doc) => {
@@ -51,6 +64,7 @@ export function getDraftsUserWorkloads(
     setWorkloads(() => items);
 
     const source = querySnapshot.metadata.fromCache ? "local cache" : "server";
+    console.log(source);
   });
   return unsubscribe;
 }
@@ -58,15 +72,25 @@ export function getDraftsUserWorkloads(
 export function getUserWorkloadsInProgress(
   userId: string,
   campusId: string,
-  setWorkloadsInProgress: any
+  setWorkloadsInProgress: any,
+  role: string,
+  college: string
 ) {
-  const q = query(
-    collection(db, "workloads", campusId, "workloads"),
-    where("createdBy", "==", userId),
-    where("validationProgress", ">=", 1),
-    where("approved", "==", false)
-    // orderBy("timestamp", "desc")
-  );
+  const q =
+    role === "FACULTY"
+      ? query(
+          collection(db, "workloads", campusId, "workloads"),
+          where("createdBy", "==", userId),
+          where("validationProgress", ">=", 1),
+          where("approved", "==", false)
+          // orderBy("timestamp", "desc")
+        )
+      : query(
+          collection(db, "workloads", campusId, "workloads"),
+          where("workload.college", "==", college),
+          where("validationProgress", ">=", 1),
+          where("approved", "==", false)
+        );
 
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
     const items: any = [];
@@ -83,14 +107,24 @@ export function getUserWorkloadsInProgress(
 export function getApprovedUserWorkloads(
   userId: string,
   campusId: string,
-  setApprovedWorkloads: any
+  setApprovedWorkloads: any,
+  role: string,
+  college: string
 ) {
-  const q = query(
-    collection(db, "workloads", campusId, "workloads"),
-    where("createdBy", "==", userId),
-    where("approved", "==", true)
-    // orderBy("timestamp", "desc")
-  );
+  const q =
+    role === "FACULTY"
+      ? query(
+          collection(db, "workloads", campusId, "workloads"),
+          where("createdBy", "==", userId),
+          where("approved", "==", true)
+          // orderBy("timestamp", "desc")
+        )
+      : query(
+          collection(db, "workloads", campusId, "workloads"),
+          where("workload.college", "==", college),
+          where("approved", "==", true)
+          // orderBy("timestamp", "desc")
+        );
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
     const items: any = [];
     querySnapshot.forEach((doc) => {
@@ -100,6 +134,30 @@ export function getApprovedUserWorkloads(
     setApprovedWorkloads(() => items);
     const source = querySnapshot.metadata.fromCache ? "local cache" : "server";
   });
+  return unsubscribe;
+}
+
+export function getCollegeFacultyMembers(
+  campusId: string,
+  college: string,
+  setFacultyMembers: any
+) {
+  const q = query(
+    collection(db, "users"),
+    where("campus", "==", campusId),
+    where("college", "==", college)
+  );
+  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    const items: any = [];
+    querySnapshot.forEach((doc) => {
+      items.push(doc.data());
+    });
+
+    setFacultyMembers(() => items);
+    const source = querySnapshot.metadata.fromCache ? "local cache" : "server";
+    console.log(source);
+  });
+
   return unsubscribe;
 }
 
@@ -238,6 +296,8 @@ export async function getUsersByCampusAndRole(campusId: string, role: string) {
 
   return data;
 }
+
+export async function getUsersByCampusAndRoleAndCollege(campusId: string) {}
 
 export async function getUserProfileFromCacheElseServer(
   userId: string,
