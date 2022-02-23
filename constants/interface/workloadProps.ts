@@ -8,4 +8,7 @@ export interface ShowModalProps extends AuthUser, UserProfileProps {
   workloads?: any;
   workloadsInProgress?: any;
   approvedWorkloads?: any;
+  facultyMembers?: UserProfileProps[] | null;
+  selectedSchoolYear?: string;
+  setSelectedSchoolYear?: any;
 }

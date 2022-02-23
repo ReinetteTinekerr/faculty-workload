@@ -4,6 +4,7 @@ import type { AppProps } from "next/app";
 import { WorkloadProvider } from "context/workloadContext";
 import { ActiveComponentProvider } from "context/activeComponentContext";
 import WorkloadHeader from "components/workload/workloadHeader";
+import { UnsubscribeWorkloadProvider } from "context/unsubscribeWorkloadContext";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (

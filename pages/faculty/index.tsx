@@ -7,64 +7,81 @@ import { ActiveComponentContext } from "context/activeComponentContext";
 import WorkloadItem from "components/routes/faculty/WorkloadItem";
 import UserProfile from "components/routes/faculty/UserProfile";
 import { useAuthSession } from "utils/hooks";
+import { UserProfileProps } from "constants/interface/formProps";
 import {
-  getApprovedUserWorkloads,
-  getDraftsUserWorkloads,
-  getUserWorkloadsInProgress,
+  getCollegeFacultyMembers,
+  getWorkloadsBySchoolYear,
 } from "../../firebase/firestoreQueries";
+import { getCurrentSchoolYear } from "utils/utils";
+// import {
+//   getApprovedUserWorkloads,
+//   getDraftsUserWorkloads,
+//   getUserWorkloadsInProgress,
+// } from "../../firebase/firestoreQueries";
 
 const Faculty: NextPage = () => {
   const [user, loading, error, userRole, userData] = useAuthSession();
   const { activeComponent, selectedItem } = useContext(ActiveComponentContext)!;
-  const [draftWorkloads, setDraftWorkloads] = useState<any>(null);
-  const [workloadsInProgress, setWorkloadsInProgress] = useState<any>(null);
-  const [approvedWorkloads, setApprovedWorkloads] = useState<any>(null);
-  // const [workloads, setWorkloads] = useState<any>(null);
+  const [facultyMembers, setFacultyMembers] = useState<
+    UserProfileProps[] | null
+  >(null);
+
+  const [workloads, setWorkloads] = useState<any>(null);
+  const [selectedSchoolYear, setSelectedSchoolYear] = useState<string>("");
 
   useEffect(() => {
-    if (!userData || !user) return;
-
-    const unsubscribe1 = getDraftsUserWorkloads(
-      user.uid,
-      userData.campus,
-      setDraftWorkloads
+    const storedSchoolYear = localStorage.getItem("schoolYear");
+    setSelectedSchoolYear(
+      !storedSchoolYear ? getCurrentSchoolYear() : storedSchoolYear
     );
-
-    // return () => unsubscribe();
-  }, [userData, user]);
+  }, []);
 
   useEffect(() => {
-    if (!userData || !user) return;
-
-    const unsubscribe2 = getUserWorkloadsInProgress(
-      user.uid,
-      userData.campus,
-      setWorkloadsInProgress
-    );
-  }, [userData, user]);
-
-  useEffect(() => {
-    if (!userData || !user) return;
-    const unsubscribe = getApprovedUserWorkloads(
-      user.uid,
+    if (!userData || userData.role !== "COLLEGE_SECRETARY") return;
+    const unsubscribe = getCollegeFacultyMembers(
       userData.campusId,
-      setApprovedWorkloads
+      userData.college,
+      setFacultyMembers
     );
-  }, [userData, user]);
 
-  if (loading || !userRole || !draftWorkloads || !userData) {
+    return () => {
+      unsubscribe();
+    };
+  }, [userData]);
+
+  useEffect(() => {
+    if (!userData || !user) return;
+    const unsubscribe = getWorkloadsBySchoolYear(
+      user.uid,
+      userData.campus,
+      setWorkloads,
+      userData.role,
+      userData.college,
+      selectedSchoolYear
+    );
+    console.log("workloads");
+
+    return () => {
+      console.log("done");
+      unsubscribe();
+    };
+  }, [userData, user, selectedSchoolYear]);
+
+  if (loading || !userRole || !userData || !user) {
     return <LoadingScreen />;
   }
 
+  // update to browser router
   switch (activeComponent) {
     case ActiveComponent.WorkloadIndex:
       return (
         <WorkloadIndex
           user={user}
           userData={userData}
-          workloads={draftWorkloads}
-          workloadsInProgress={workloadsInProgress}
-          approvedWorkloads={approvedWorkloads}
+          facultyMembers={facultyMembers}
+          workloads={workloads}
+          selectedSchoolYear={selectedSchoolYear}
+          setSelectedSchoolYear={setSelectedSchoolYear}
         />
       );
     case ActiveComponent.WorkloadItem:
@@ -78,8 +95,7 @@ const Faculty: NextPage = () => {
       );
     case ActiveComponent.Profile:
       return <UserProfile userData={userData} />;
-    case ActiveComponent.Loading:
-      return <LoadingScreen />;
+
     default:
       return <LoadingScreen />;
   }

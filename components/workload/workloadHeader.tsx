@@ -9,6 +9,7 @@ import { ActiveComponent } from "constants/enums/activeComponent";
 import Link from "next/link";
 import { useAuthSession } from "utils/hooks";
 import { useRouter } from "next/router";
+import { UnsubscribeWorkloadContext } from "context/unsubscribeWorkloadContext";
 const { TabPane } = Tabs;
 const { Header } = Layout;
 
@@ -41,7 +42,9 @@ function WorkloadHeader() {
         icon={<LogoutOutlined />}
         danger={true}
         key="setting:2"
-        onClick={logout}
+        onClick={() => {
+          logout();
+        }}
       >
         Sign Out
       </Menu.Item>
@@ -51,14 +54,10 @@ function WorkloadHeader() {
     <Header
       style={{
         background: "#fff",
-        // height: "70px",
         borderBottom: "1px solid",
         borderColor: "rgb(198,198,198)",
         paddingLeft: "15px",
         paddingRight: "15px",
-        // position: "fixed",
-        // zIndex: 1,
-        // width: "100%",
       }}
     >
       <Row align="middle" justify="start">
@@ -125,7 +124,8 @@ function WorkloadHeader() {
                 <TabPane
                   tab={
                     userRole?.includes("FACULTY") ||
-                    userRole?.includes("VALIDATOR") ? (
+                    userRole?.includes("VALIDATOR") ||
+                    userRole?.includes("COLLEGE_SECRETARY") ? (
                       <Link href={"/faculty"}>Faculty Workloads</Link>
                     ) : (
                       <></>
@@ -140,7 +140,8 @@ function WorkloadHeader() {
                       <Dropdown overlay={menu} trigger={["click"]}>
                         <Title level={5}>
                           <a onClick={(e) => e.preventDefault()}>
-                            {user.displayName} <DownOutlined />
+                            {firstNameCharLastName(userData?.username)}{" "}
+                            <DownOutlined />
                           </a>
                         </Title>
                       </Dropdown>
@@ -157,6 +158,16 @@ function WorkloadHeader() {
       </Row>
     </Header>
   );
+}
+
+function firstNameCharLastName(fullname: string | null) {
+  if (!fullname) return "";
+  const nameArr = fullname.split(" ");
+
+  if (nameArr.length >= 2) {
+    return nameArr[0][0] + "." + nameArr[nameArr.length - 1];
+  }
+  return nameArr[0];
 }
 
 export default WorkloadHeader;

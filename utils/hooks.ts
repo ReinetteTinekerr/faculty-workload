@@ -32,7 +32,7 @@ export function useAuthSession() {
 
         if (
           currentRoute === "/faculty" &&
-          !["FACULTY", "VALIDATOR"].includes(role)
+          !["FACULTY", "VALIDATOR", "COLLEGE_SECRETARY"].includes(role)
         ) {
           router.push("/404");
         } else if (currentRoute === "/admin" && role !== "ADMIN") {
@@ -53,8 +53,9 @@ export function useAuthSession() {
         ) {
           router.replace("/validate-workloads");
         } else if (
-          (currentRoute === "/login" || currentRoute === "/") &&
-          role === "FACULTY"
+          ((currentRoute === "/login" || currentRoute === "/") &&
+            role === "FACULTY") ||
+          role === "COLLEGE_SECRETARY"
         ) {
           router.replace("/faculty");
         }

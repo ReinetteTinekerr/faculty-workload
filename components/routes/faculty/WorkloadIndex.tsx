@@ -1,29 +1,24 @@
 import { Layout } from "antd";
-import { ISUFooter } from "components/layout/footer";
 import WorkloadLayout from "components/layout/WorkloadLayout";
 import { WorkloadContentList } from "components/workload/workloadContentList";
-import WorkloadHeader from "components/workload/workloadHeader";
 import { WorkloadModal } from "components/workload/workloadModal";
-import { ProgressSider } from "components/workload/workloadSider";
-import { AuthUser } from "constants/interface/firebaseUser";
-import { WorkloadDataProps } from "constants/interface/formProps";
-import Head from "next/head";
 import { useState } from "react";
-import { useAuthSession } from "utils/hooks";
-
-interface WorkloadIndexProps {
-  workloadList: WorkloadDataProps[] | [];
-}
+import LoadingScreen from "components/layout/loadingScreen";
 
 export default function WorkloadIndex({
-  workloads,
   user,
   userData,
-  workloadsInProgress,
-  approvedWorkloads,
+  facultyMembers,
+  workloads,
+  selectedSchoolYear,
+  setSelectedSchoolYear,
 }: any) {
   const [visible, setVisible] = useState(false);
-  // const { user, userData } = useAuthSession();
+
+  if (!workloads) {
+    return <LoadingScreen />;
+  }
+
   return (
     <>
       <WorkloadLayout headerTitle="ISU Faculty">
@@ -32,17 +27,18 @@ export default function WorkloadIndex({
             <WorkloadContentList
               setVisible={setVisible}
               workloads={workloads}
-              workloadsInProgress={workloadsInProgress}
-              approvedWorkloads={approvedWorkloads}
+              setSelectedSchoolYear={setSelectedSchoolYear}
+              selectedSchoolYear={selectedSchoolYear}
             />
           </Layout>
           <WorkloadModal
+            workloads={workloads}
             setVisible={setVisible}
             visible={visible}
             user={user}
             userData={userData}
+            facultyMembers={facultyMembers}
           />
-          {/* <ProgressSider /> */}
         </Layout>
       </WorkloadLayout>
     </>

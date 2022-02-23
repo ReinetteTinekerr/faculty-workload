@@ -55,8 +55,8 @@ export default function RegisterAccount() {
           password: "isuworkload123",
           position: "NONE",
           baccalaureate: "",
-          masteral: "",
-          doctorate: "",
+          masteral: " ",
+          doctorate: " ",
           department: "",
           extension: "",
         }}
@@ -112,7 +112,7 @@ export default function RegisterAccount() {
                 <Option value="MIT">MIT</Option>
                 <Option value="DPA">DPA</Option>
                 <Option value="DIT">DIT</Option>
-                <Option value="">NONE</Option>
+                <Option value=" ">NONE</Option>
               </Select>
             </Form.Item>
           </Col>
@@ -180,7 +180,7 @@ export default function RegisterAccount() {
                 }
               >
                 <Option value="MIT">MIT</Option>
-                <Option value="">NONE</Option>
+                <Option value=" ">NONE</Option>
               </Select>
             </Form.Item>
           </Col>
@@ -218,7 +218,7 @@ export default function RegisterAccount() {
                 }
               >
                 <Option value="DIT">DIT</Option>
-                <Option value="">NONE</Option>
+                <Option value=" ">NONE</Option>
               </Select>
             </Form.Item>
           </Col>
@@ -287,7 +287,7 @@ export default function RegisterAccount() {
                 <Option title="College of Education" value="CoEd">
                   CoEd
                 </Option>
-                <Option value="">NONE</Option>
+                <Option value=" ">NONE</Option>
               </Select>
             </Form.Item>
           </Col>
@@ -466,6 +466,7 @@ export default function RegisterAccount() {
                 <Option value="FACULTY">FACULTY</Option>
                 <Option value="VALIDATOR">WORKLOAD VALIDATOR</Option>
                 <Option value="ADMIN">ADMIN</Option>
+                <Option value="COLLEGE_SECRETARY">COLLEGE SECRETARY</Option>
               </Select>
             </Form.Item>
           </Col>

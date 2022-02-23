@@ -12,7 +12,6 @@ import {
   Timeline,
 } from "antd";
 import type { NextPage } from "next";
-import Head from "next/head";
 import { Tabs } from "antd";
 import {
   ApartmentOutlined,
@@ -281,6 +280,7 @@ const columns = [
         <Option value="ADMIN">ADMIN</Option>
         <Option value="FACULTY">FACULTY</Option>
         <Option value="VALIDATOR">VALIDATOR</Option>
+        <Option value="COLLEGE_SECRETARY">COLLEGE SECRETARY</Option>
       </Select>
     ),
   },

@@ -23,8 +23,10 @@ const WorkloadLayout: NextPage<ChildrenProps> = ({ children, headerTitle }) => {
       </Head>
       <Layout style={{ height: "100vh" }}>
         <WorkloadHeader />
-        {children}
-        <ISUFooter />
+        <>
+          {children}
+          <ISUFooter />
+        </>
       </Layout>
     </>
   );

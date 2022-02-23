@@ -25,11 +25,10 @@ import { ProgressSider } from "components/workload/workloadSider";
 import {
   deleteWorkload,
   submitWorkload,
-  unsubmitWorkload,
 } from "../../../firebase/firestoreQueries";
 import { useAuthSession } from "utils/hooks";
 import LoadingScreen from "components/layout/loadingScreen";
-// import { Image } from "next/image";
+import WorkloadLayout from "components/layout/WorkloadLayout";
 
 const { Content } = Layout;
 
@@ -43,7 +42,7 @@ interface ResearchAndProductionProps {
 }
 interface UserInfoProps {
   label: string | undefined;
-  data: string | undefined;
+  data: string | undefined | [string, string];
   labelSpan: number | undefined;
   dataSpan: number | undefined;
 }
@@ -369,7 +368,7 @@ class WorkloadFormToPrint extends Component<{
           <Col span={9}>
             <UserInfoField
               label="School Year:"
-              data={getSchoolYear(this.props.workload?.schoolYear)}
+              data={this.props.workload?.schoolYear}
               labelSpan={6}
               dataSpan={18}
             />
@@ -511,7 +510,10 @@ class WorkloadFormToPrint extends Component<{
           creditUnits=""
         /> */}
         <br />
-        <HorizontalLineInfo label="E. Administration" total="0" />
+        <HorizontalLineInfo
+          label="E. Administration"
+          total={this.props.workload?.positionUnits}
+        />
 
         <Row justify="center">
           <Col span={2}>Position</Col>
@@ -532,7 +534,7 @@ class WorkloadFormToPrint extends Component<{
               fontWeight: "bold",
             }}
           >
-            4
+            {this.props.workload?.positionUnits}
           </Col>
         </Row>
         <br />
@@ -736,13 +738,15 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
 
   let componentRef = useRef<any>();
 
+  const pdfRef = useRef<any>();
+
   if (!userData) {
     return <LoadingScreen />;
   }
 
   return (
-    <Layout style={{ height: "100vh" }}>
-      <WorkloadHeader />
+    // <Layout style={{ height: "100vh" }}>
+    <WorkloadLayout headerTitle={selectedItem.name}>
       <Layout
         style={{
           marginTop: "10px",
@@ -770,6 +774,11 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
                       trigger={() => <Button type="default">PRINT</Button>}
                       content={() => componentRef.current!}
                     />
+                    {/* <ReactToPdf targetRef={pdfRef} filename="div-blue.pdf">
+        {({toPdf}:any) => (
+            <button onClick={toPdf}>Generate pdf</button>
+        )}
+    </ReactToPdf> */}
                     <Popconfirm
                       disabled={submitted}
                       key={"approve"}
@@ -811,7 +820,7 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
                 ) : (
                   <></>
                 )}
-                {role === "FACULTY" ? (
+                {role === "FACULTY" || role === "COLLEGE_SECRETARY" ? (
                   <div>
                     {!workload.approved ? (
                       <Popconfirm
@@ -826,7 +835,7 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
                                 setActiveComponent(
                                   ActiveComponent.WorkloadIndex
                                 );
-                                message.warning("Workload Deleted!");
+                                message.success("Workload Deleted!");
                               }
                             );
                           });
@@ -878,21 +887,24 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
                           {submitting ? "SUMITTING..." : "SUBMIT"}
                         </Button>
                       ) : (
-                        <Popconfirm
-                          key={"unsubmit"}
-                          title="Are you sure you want to unsubmit this workload?"
-                          okText="Yes"
-                          cancelText="No"
-                          onConfirm={() => {
-                            unsubmitWorkload(workload.workloadId, campusId);
-                            setSubmitted(false);
-                          }}
-                          onCancel={() => {}}
-                        >
-                          <Button key="1" type="dashed" onClick={() => {}}>
-                            UNSUBMIT
-                          </Button>
-                        </Popconfirm>
+                        // <Popconfirm
+                        //   key={"unsubmit"}
+                        //   title="Are you sure you want to unsubmit this workload?"
+                        //   okText="Yes"
+                        //   cancelText="No"
+                        //   onConfirm={() => {
+                        //     unsubmitWorkload(workload.workloadId, campusId);
+                        //     setSubmitted(false);
+                        //   }}
+                        //   onCancel={() => {}}
+                        // >
+                        //   <Button key="1" type="dashed" onClick={() => {}}>
+                        //     UNSUBMIT
+                        //   </Button>
+                        // </Popconfirm>
+                        <Button key="submitted" disabled>
+                          SUBMITTED
+                        </Button>
                       )
                     ) : (
                       <></>
@@ -922,7 +934,7 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
                 />
               </div>
             </Col>
-            <Col style={{ marginLeft: "30px" }}>
+            {/* <Col style={{ marginLeft: "30px" }}>
               <Row>
                 <Col>
                   <Image
@@ -950,7 +962,7 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
                   />
                 </Col>
               </Row>
-            </Col>
+            </Col> */}
           </Row>
           <br />
         </Content>
@@ -959,7 +971,7 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
           validationProgress={workload.validationProgress}
         />
       </Layout>
-    </Layout>
+    </WorkloadLayout>
   );
 }
 

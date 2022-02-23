@@ -1,13 +1,30 @@
 import moment from "moment";
 
-export function getSchoolYear(
-  schoolYear: [string, string] | undefined
-): string | undefined {
+export function getSchoolYear(schoolYear: any) {
   if (schoolYear === undefined) return "";
   return (
     new Date(schoolYear[0]).getFullYear().toString() +
     " - " +
     new Date(schoolYear[1]).getFullYear().toString()
+  );
+}
+
+export function getCurrentSchoolYear() {
+  const date = new Date();
+  const lowerYear =
+    date < new Date(date.getFullYear(), 7, 1)
+      ? date.getFullYear() - 1
+      : date.getFullYear();
+  const upperYear = lowerYear + 1;
+  return lowerYear.toString() + " - " + upperYear.toString();
+}
+
+export function getDecrementedSchoolYear(schoolYear: string, i: number) {
+  const schoolYearArr = schoolYear.split(" - ");
+  return (
+    (Number(schoolYearArr[0]) - i).toString() +
+    " - " +
+    (Number(schoolYearArr[1]) - i).toString()
   );
 }
 

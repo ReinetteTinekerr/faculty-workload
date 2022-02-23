@@ -5,15 +5,14 @@ import {
   GraduateDataProps,
 } from "constants/interface/formProps";
 import { ShowModalProps } from "constants/interface/workloadProps";
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import WorkloadForm from "./workloadForm";
 
-import { User } from "firebase/auth";
 import {
   getUsersByCampusAndRole,
   uploadWorkloadToFirestore,
 } from "../../firebase/firestoreQueries";
-import { getValidators } from "utils/utils";
+import { getSchoolYear, getValidators } from "utils/utils";
 
 const formItemLayout = {
   labelCol: {
@@ -29,18 +28,39 @@ const formItemLayout = {
     lg: { span: 8 },
   },
 };
-export const WorkloadFormContext = createContext<FormInstance<any> | null>(
-  null
-);
+export const WorkloadFormContext = createContext<any>(null);
 
 export function WorkloadModal({
   visible,
   setVisible,
   user,
   userData,
+  facultyMembers,
+  workloads,
 }: ShowModalProps) {
+  facultyMembers = facultyMembers === undefined ? null : facultyMembers;
+  // console.log(facultyMembers);
+
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [workloadUser, setWorkloadUser] = useState(null);
+  const [workloadUsers, setWorkloadUsers] = useState(null);
+  const formInitialValues =
+    userData?.role === "COLLEGE_SECRETARY"
+      ? { campus: userData?.campus, college: userData?.college }
+      : {
+          name: userData?.username,
+          masteral: userData?.masteral,
+          college: userData?.college,
+          campus: userData?.campus,
+          doctorate: userData?.doctorate,
+          baccalaureate: userData?.baccalaureate,
+        };
+
+  useEffect(() => {
+    if (userData?.role === "COLLEGE_SECRETARY") {
+    }
+  }, [workloadUsers]);
 
   // useEffect(() => {
   //   if (loading) {
@@ -59,24 +79,54 @@ export function WorkloadModal({
     if (!user || !userData) {
       return { success: false };
     }
+    let faculty: any = userData; // signature may change if the role is COLLEGE_SECRETARY
 
     try {
       const values: WorkloadDataProps = await form.validateFields();
+      if (workloads) {
+        const workload = workloads.filter((workload: any) => {
+          return workload.workload.semester == values.semester;
+        });
+        console.log(workloads, "loads");
+
+        if (workload.length >= 1 && userData.role !== "COLLEGE_SECRETARY") {
+          message.error("ERROR: Duplicate workload in a semester");
+          throw "Duplicate workload in a semester";
+        }
+      }
+      if (
+        workloads &&
+        workloads.length >= 3 &&
+        userData.role !== "COLLEGE_SECRETARY"
+      ) {
+        message.error("ERROR: Maximum of 3 workloads per school year");
+        throw "Invalid workload length";
+      }
+
       if (values.undergraduate === undefined && values.graduate === undefined) {
         message.error("Table is empty");
         throw "table is empty";
       }
 
-      if (!userData.signature) {
-        message.error("Please check your profile and provide a signature");
+      if (userData?.role === "COLLEGE_SECRETARY") {
+        const member = facultyMembers?.filter(
+          (member: any) => member.username == values.name
+        )[0];
+        if (member) {
+          faculty = member;
+        }
+      }
+
+      if (!faculty.signature) {
+        message.error("Please provide a signature");
         return { success: false };
       }
 
       const dataWithId = await updateAndUploadValuesToFirestore(
         values,
-        user,
-        userData!.campusId,
-        userData!.signature
+        faculty.uid,
+        faculty!.campusId,
+        faculty!.signature
       );
       message.success("Workload created Woohoo!");
 
@@ -117,20 +167,13 @@ export function WorkloadModal({
       ]}
     >
       <Form
-        initialValues={{
-          name: userData?.username,
-          masteral: userData?.masteral,
-          college: userData?.college,
-          campus: userData?.campus,
-          doctorate: userData?.doctorate,
-          baccalaureate: userData?.baccalaureate,
-        }}
+        initialValues={formInitialValues}
         {...formItemLayout}
         form={form}
         name="createWorkload"
         scrollToFirstError
       >
-        <WorkloadFormContext.Provider value={form}>
+        <WorkloadFormContext.Provider value={{ form, facultyMembers }}>
           <WorkloadForm />
         </WorkloadFormContext.Provider>
       </Form>
@@ -139,7 +182,7 @@ export function WorkloadModal({
 }
 async function updateAndUploadValuesToFirestore(
   values: WorkloadDataProps,
-  user: User,
+  userId: string,
   campusId: string,
   ownerSignature: string
 ) {
@@ -163,7 +206,7 @@ async function updateAndUploadValuesToFirestore(
   const uploadedWorkload = await uploadWorkloadToFirestore(
     withTotalOfWorkloads,
     campusId,
-    user.uid,
+    userId,
     validators,
     ownerSignature
   );
@@ -218,12 +261,15 @@ function EvaluateWorkload(values: WorkloadDataProps) {
     undergraduateSumFTE +
     graduateSumCreditUnits +
     researchUnitsSum +
-    extensionProductionSum;
+    extensionProductionSum +
+    values.positionUnits;
 
   excessFacultyWorkload = totalFacultyWorkload - 21;
 
+  const schoolYear = getSchoolYear(values.schoolYear);
   const withFTE = {
     ...values,
+    schoolYear,
     undergraduate: undergraduateWithFTEresult,
     undergraduateSumFTE,
     graduateSumCreditUnits: graduateSumCreditUnits,
