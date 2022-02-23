@@ -27,10 +27,14 @@ const Faculty: NextPage = () => {
   >(null);
 
   const [workloads, setWorkloads] = useState<any>(null);
-  const storedSchoolYear = localStorage.getItem("schoolYear");
-  const [selectedSchoolYear, setSelectedSchoolYear] = useState<string>(
-    !storedSchoolYear ? getCurrentSchoolYear() : storedSchoolYear
-  );
+  const [selectedSchoolYear, setSelectedSchoolYear] = useState<string>("");
+
+  useEffect(() => {
+    const storedSchoolYear = localStorage.getItem("schoolYear");
+    setSelectedSchoolYear(
+      !storedSchoolYear ? getCurrentSchoolYear() : storedSchoolYear
+    );
+  }, []);
 
   useEffect(() => {
     if (!userData || userData.role !== "COLLEGE_SECRETARY") return;
