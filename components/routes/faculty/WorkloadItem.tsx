@@ -17,7 +17,12 @@ import styles from "styles/ID.module.css";
 import ReactToPrint from "react-to-print";
 import { Component, useContext, useEffect, useRef, useState } from "react";
 import { WorkloadDataProps } from "constants/interface/formProps";
-import { getDate, getSchoolYear, toTitleCase } from "utils/utils";
+import {
+  getDate,
+  getSchoolYear,
+  sumValidatorsValidation,
+  toTitleCase,
+} from "utils/utils";
 import moment from "moment";
 import { ActiveComponentContext } from "context/activeComponentContext";
 import { ActiveComponent } from "constants/enums/activeComponent";
@@ -29,6 +34,7 @@ import {
 import { useAuthSession } from "utils/hooks";
 import LoadingScreen from "components/layout/loadingScreen";
 import WorkloadLayout from "components/layout/WorkloadLayout";
+import { useRouter } from "next/router";
 
 const { Content } = Layout;
 
@@ -716,6 +722,7 @@ class WorkloadFormToPrint extends Component<{
 function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
   const [_, __, ___, ____, userData] = useAuthSession();
 
+  const router = useRouter();
   const selectedItem: WorkloadDataProps = workload.workload;
   const withUIDValidators = workload.validators;
   const validators = Object.values(withUIDValidators).sort(
@@ -730,15 +737,18 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
     ActiveComponentContext
   )!;
 
-  const [submitted, setSubmitted] = useState(
-    workload.validationProgress > positionIndex
-  );
+  const totalValidation = sumValidatorsValidation(workload.validators);
+  console.log(totalValidation, positionIndex);
+
+  const isPending = totalValidation === positionIndex - 1;
+  const isApproved = totalValidation >= positionIndex;
+  const [approved, setApproved] = useState(isApproved);
+  const [submitted, setSubmitted] = useState(workload.submitted);
+  console.log(workload.createdBy);
 
   const [submitting, setSubmitting] = useState(false);
 
   let componentRef = useRef<any>();
-
-  const pdfRef = useRef<any>();
 
   if (!userData) {
     return <LoadingScreen />;
@@ -768,60 +778,56 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
             extra={[
               <div key={"base"}>
                 {role === "VALIDATOR" ? (
-                  <div>
-                    <ReactToPrint
-                      key={"print"}
-                      trigger={() => <Button type="default">PRINT</Button>}
-                      content={() => componentRef.current!}
-                    />
-                    {/* <ReactToPdf targetRef={pdfRef} filename="div-blue.pdf">
-        {({toPdf}:any) => (
-            <button onClick={toPdf}>Generate pdf</button>
-        )}
-    </ReactToPdf> */}
-                    <Popconfirm
-                      disabled={submitted}
-                      key={"approve"}
-                      title="Are you sure you want to approve this workload?"
-                      okText="Yes"
-                      cancelText="No"
-                      onConfirm={() => {
-                        if (!userData.signature) {
-                          message.error(
-                            "Please check your profile and provide a signature"
-                          );
-                          return;
-                        }
-                        // unsubmitWorkload(workload.workloadId, "Echague Campus");
-                        submitWorkload(
-                          workload.workloadId,
-                          campusId,
-                          true,
-                          userData.uid,
-                          workload.validators
-                        ).then(() => {
-                          setSubmitted(true);
-                          message.success("Workload approved!");
-                        });
-                        // setSubmitted(false);
-                      }}
-                      onCancel={() => {}}
-                    >
-                      <Button
-                        disabled={submitted}
-                        key="1"
-                        type="primary"
-                        onClick={() => {}}
+                  <>
+                    {workload.submitted && (isPending || isApproved) ? (
+                      <Popconfirm
+                        // disabled={!approved}
+                        key={"approve"}
+                        title="Are you sure you want to approve this workload?"
+                        okText="Yes"
+                        cancelText="No"
+                        onConfirm={() => {
+                          if (!userData.signature) {
+                            message.error(
+                              "Please check your profile and provide a signature"
+                            );
+                            return;
+                          }
+                          // unsubmitWorkload(workload.workloadId, "Echague Campus");
+                          submitWorkload(
+                            workload.workloadId,
+                            campusId,
+                            true,
+                            userData.uid,
+                            workload.validators
+                          ).then(() => {
+                            setApproved(true);
+                            message.success("Workload approved!");
+                          });
+                          // setSubmitted(false);
+                        }}
+                        onCancel={() => {}}
                       >
-                        {submitted ? "APPROVED" : "APPROVE"}
-                      </Button>
-                    </Popconfirm>
-                  </div>
+                        <Button
+                          disabled={approved}
+                          key="1"
+                          type="primary"
+                          onClick={() => {}}
+                        >
+                          {approved ? "APPROVED" : "APPROVE"}
+                        </Button>
+                      </Popconfirm>
+                    ) : (
+                      <></>
+                    )}
+                  </>
                 ) : (
                   <></>
                 )}
-                {role === "FACULTY" || role === "COLLEGE_SECRETARY" ? (
-                  <div>
+                {role === "FACULTY" ||
+                role === "COLLEGE_SECRETARY" ||
+                (role === "VALIDATOR" && router.pathname === "/faculty") ? (
+                  <>
                     {!workload.approved ? (
                       <Popconfirm
                         title="Are you sure you want to DELETE this workload?"
@@ -849,14 +855,7 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
                     ) : (
                       <></>
                     )}
-                    <ReactToPrint
-                      key={"print"}
-                      trigger={() => <Button type="default">PRINT</Button>}
-                      content={() => componentRef.current!}
-                    />
-                    {/* <Button key="edit" type="default">
-                      EDIT
-                    </Button> */}
+
                     {!workload.approved ? (
                       !submitted ? (
                         <Button
@@ -887,21 +886,6 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
                           {submitting ? "SUMITTING..." : "SUBMIT"}
                         </Button>
                       ) : (
-                        // <Popconfirm
-                        //   key={"unsubmit"}
-                        //   title="Are you sure you want to unsubmit this workload?"
-                        //   okText="Yes"
-                        //   cancelText="No"
-                        //   onConfirm={() => {
-                        //     unsubmitWorkload(workload.workloadId, campusId);
-                        //     setSubmitted(false);
-                        //   }}
-                        //   onCancel={() => {}}
-                        // >
-                        //   <Button key="1" type="dashed" onClick={() => {}}>
-                        //     UNSUBMIT
-                        //   </Button>
-                        // </Popconfirm>
                         <Button key="submitted" disabled>
                           SUBMITTED
                         </Button>
@@ -909,10 +893,15 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
                     ) : (
                       <></>
                     )}
-                  </div>
+                  </>
                 ) : (
                   <></>
                 )}
+                <ReactToPrint
+                  key={"print"}
+                  trigger={() => <Button type="default">PRINT</Button>}
+                  content={() => componentRef.current!}
+                />
               </div>,
             ]}
           />

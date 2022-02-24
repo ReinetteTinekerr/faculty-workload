@@ -3,6 +3,7 @@ import { Row, Steps, Tag } from "antd";
 import { Layout } from "antd";
 import { useState } from "react";
 import { MenuUnfoldOutlined, MenuFoldOutlined } from "@ant-design/icons";
+import { sumValidatorsValidation } from "utils/utils";
 
 const { Sider } = Layout;
 const { Step } = Steps;
@@ -31,6 +32,7 @@ export function ProgressSider({ validators, validationProgress }: any) {
   const arrayValidators = Object.values(validators).sort(
     (a: any, b: any) => a.positionIndex - b.positionIndex
   );
+  const totalValidation = sumValidatorsValidation(validators);
   return (
     <Sider
       trigger={null}
@@ -65,16 +67,17 @@ export function ProgressSider({ validators, validationProgress }: any) {
           let status = "";
           let icon = null;
 
-          if (validationProgress === 0) {
+          if (totalValidation === -1) {
             status = "wait";
-          } else if (validationProgress === index + 1) {
+          } else if (totalValidation === index) {
             status = "process";
             icon = <LoadingOutlined />;
-          } else if (validationProgress >= index + 1) {
+          } else if (totalValidation >= index + 1) {
             status = "finish";
           } else {
             status = "wait";
           }
+          status = validator.validated ? "finish" : "wait";
           return (
             <Step
               key={index}

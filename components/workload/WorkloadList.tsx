@@ -1,106 +1,231 @@
-import { Avatar, List, Progress, Row, Typography, Tag, Badge } from "antd";
+import {
+  Avatar,
+  List,
+  Progress,
+  Row,
+  Typography,
+  Tag,
+  Badge,
+  Collapse,
+} from "antd";
 import { ActiveComponent } from "constants/enums/activeComponent";
 import { ActiveComponentContext } from "context/activeComponentContext";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import styles from "styles/Home.module.css";
-import { getDate } from "utils/utils";
+import { getDate, sumValidatorsValidation } from "utils/utils";
 
-const { Text } = Typography;
+const { Text, Title } = Typography;
+const { Panel } = Collapse;
 
-export function WorkloadList({ workloads }: any) {
-  //main
+export function WorkloadList({
+  workloads,
+  userRole,
+  userPositionIndex,
+  selectedSemester,
+  setSelectedSemester,
+}: any) {
   const { setActiveComponent, setSelectedItem } = useContext(
     ActiveComponentContext
   )!;
 
-  const userWorkloads = workloads.map((workload: any) => {
-    return workload.workload;
-  });
-  // .sort((a: any, b: any) => b.createdAt - a.createdAt);
+  // const [selectedSemester, setSelectedSemester] = useState("");
+  // useEffect(() => {
+  //   const storedSemester = localStorage.getItem("semester");
+  //   setSelectedSemester(storedSemester ? storedSemester : "First Semester");
+  // }, []);
+
+  const sem = {
+    sem1: "First Semester",
+    sem2: "Second Semester",
+    summer: "Summer",
+  };
+  const firstSemWorkloads = workloads.filter(
+    (workload: any) => workload.workload.semester === sem.sem1
+  );
+
+  const secondSemWorkloads = workloads.filter(
+    (workload: any) => workload.workload.semester === sem.sem2
+  );
+  const summerWorkloads = workloads.filter(
+    (workload: any) => workload.workload.semester === sem.summer
+  );
+
+  const workloadsPerSemester = {
+    "First Semester": firstSemWorkloads,
+    "Second Semester": secondSemWorkloads,
+    Summer: summerWorkloads,
+  };
+  console.log(selectedSemester);
+
   return (
-    <div style={{ overflow: "auto" }}>
-      <List
-        // bordered
-        size="small"
-        itemLayout="horizontal"
-        dataSource={userWorkloads}
-        style={{
-          paddingLeft: "12px",
-          paddingRight: "12px",
+    <>
+      <Collapse
+        style={{ width: "90%", margin: "auto" }}
+        defaultActiveKey={
+          userRole === "VALIDATOR"
+            ? selectedSemester
+            : ["First Semester", "Second Semester", "Summer"]
+        }
+        accordion={userRole === "VALIDATOR" ? true : false}
+        onChange={(value) => {
+          console.log("collapse", value);
+          if (setSelectedSemester) {
+            setSelectedSemester(value ? value.toString() : "");
+            localStorage.setItem("semester", value ? value.toString() : "");
+          }
         }}
-        renderItem={(item: any, index) => (
-          <RibbonBadge isApproved={workloads[index].approved}>
-            <List.Item
-              className={styles.listItem}
-              onClick={() => {
-                setSelectedItem(workloads[index]);
-                setActiveComponent(ActiveComponent.WorkloadItem);
-              }}
+      >
+        {Object.entries(workloadsPerSemester).map(([key, value]) => {
+          return (
+            <Panel
+              header={<Title level={5}>{key}</Title>}
+              extra={`Total: ${value.length}`}
+              key={key}
             >
-              <List.Item.Meta
-                avatar={
-                  <Avatar style={{ background: "#f56a00" }}>
-                    {item.name[0]}
-                  </Avatar>
-                }
-                title={
-                  <a>
-                    <span style={{ paddingRight: "15px" }}>
-                      {item.name}, {item.doctorate}
-                    </span>
-                    <Tag color={"default"}>
-                      TOTAL FACULTY WORKLOAD:{" "}
-                      <Text strong>{item.totalFacultyWorkload}</Text>
-                    </Tag>
-                  </a>
-                }
-                description={
-                  <>
-                    {/* <Tag color={"default"}>
-                    TOTAL FACULTY WORKLOAD:{" "}
-                    <Text strong>{item.totalFacultyWorkload}</Text>
-                  </Tag>
-                  <Tag color={"default"}>
-                    EXCESS FACULTY WORKLOAD:{" "}
-                    <Text strong>{item.excessFacultyWorkload}</Text>
-                  </Tag> */}
-                  </>
-                }
-              />
-              <List.Item
-                extra={<WorkloadProgress workload={workloads[index]} />}
-              ></List.Item>
-              <List.Item
-                extra={<Text strong>{getDate(item.createdAt)}</Text>}
-              ></List.Item>
-            </List.Item>
-          </RibbonBadge>
-        )}
-      />
-    </div>
+              <div style={{ overflow: "auto" }}>
+                <List
+                  bordered
+                  size="small"
+                  itemLayout="horizontal"
+                  dataSource={value}
+                  style={{
+                    paddingLeft: "12px",
+                    paddingRight: "12px",
+                  }}
+                  renderItem={(item: any, index) => (
+                    <RibbonBadge
+                      // validationProgress={item.workload.validationProgress}
+                      isSubmitted={item.submitted}
+                      userRole={userRole}
+                      userPositionIndex={userPositionIndex}
+                      validators={item.validators}
+                      isApproved={item.approved}
+                    >
+                      <List.Item
+                        className={styles.listItem}
+                        onClick={() => {
+                          setSelectedItem(item);
+                          setActiveComponent(ActiveComponent.WorkloadItem);
+                        }}
+                      >
+                        <List.Item.Meta
+                          avatar={
+                            <Avatar style={{ background: "#f56a00" }}>
+                              {item.workload.name[0]}
+                            </Avatar>
+                          }
+                          title={
+                            <a>
+                              <span style={{ paddingRight: "15px" }}>
+                                {item.workload.name}, {item.workload.doctorate}
+                              </span>
+                              <Tag color={"default"}>
+                                TOTAL FACULTY WORKLOAD:{" "}
+                                <Text strong>
+                                  {item.workload.totalFacultyWorkload}
+                                </Text>
+                              </Tag>
+                            </a>
+                          }
+                          description={<></>}
+                        />
+                        <List.Item
+                          extra={<WorkloadProgress workload={item} />}
+                        ></List.Item>
+                        <List.Item
+                          extra={
+                            <Text strong>
+                              {getDate(item.workload.createdAt)}
+                            </Text>
+                          }
+                        ></List.Item>
+                      </List.Item>
+                    </RibbonBadge>
+                  )}
+                />
+              </div>
+            </Panel>
+          );
+        })}
+      </Collapse>
+    </>
   );
 }
 
 function WorkloadProgress({ workload }: any) {
   const validatorsLength = Object.values(workload.validators).length;
-  const validationProgress = workload.validationProgress - 1;
+  // const validationProgress = workload.validationProgress - 1;
+  const totalValidation = sumValidatorsValidation(workload.validators);
 
   const progress = Number(
-    ((validationProgress / validatorsLength) * 100).toFixed(0)
+    ((totalValidation / validatorsLength) * 100).toFixed(0)
   );
 
   return <Progress width={25} type="circle" percent={progress} />;
 }
 
-function RibbonBadge({ isApproved, children }: any) {
+function RibbonBadge({
+  userRole,
+  userPositionIndex,
+  isSubmitted,
+  isApproved,
+  children,
+  validators,
+}: any) {
+  // console.log(userPositionIndex, validationProgress);
+  // console.log(Object.values(validators));
+  const totalValidation = sumValidatorsValidation(validators);
+
+  // if (userRole === "VALIDATOR" && validationProgress == userPositionIndex&& )
+
   if (isApproved) {
     return (
       <Badge.Ribbon
         style={{
           marginTop: "-8px",
         }}
-        text="Approved"
+        text="Accepted"
         color={"green"}
+      >
+        {children}
+      </Badge.Ribbon>
+    );
+  }
+
+  if (totalValidation >= userPositionIndex && userRole === "VALIDATOR") {
+    return (
+      <Badge.Ribbon
+        style={{
+          marginTop: "-8px",
+        }}
+        text="Approved"
+        color={"blue"}
+      >
+        {children}
+      </Badge.Ribbon>
+    );
+  }
+  if (totalValidation === userPositionIndex - 1 && isSubmitted) {
+    return (
+      <Badge.Ribbon
+        style={{
+          marginTop: "-8px",
+        }}
+        text="Pending"
+        color={"volcano"}
+      >
+        {children}
+      </Badge.Ribbon>
+    );
+  }
+  if (userRole !== "VALIDATOR" && isSubmitted) {
+    return (
+      <Badge.Ribbon
+        style={{
+          marginTop: "-8px",
+        }}
+        text="Submitted"
+        color={"cyan"}
       >
         {children}
       </Badge.Ribbon>
