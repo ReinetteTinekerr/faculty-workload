@@ -104,3 +104,13 @@ export function getValidators(validatorsData: any, college: string) {
 
   return JSON.parse(JSON.stringify(validators));
 }
+
+export function sumValidatorsValidation(validators: object) {
+  const totalValidation = Object.values(validators).reduce(
+    (accum: number, validator: any) => {
+      return accum + validator.validated;
+    },
+    0
+  );
+  return totalValidation;
+}

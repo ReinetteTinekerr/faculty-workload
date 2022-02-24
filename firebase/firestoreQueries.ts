@@ -39,7 +39,7 @@ export function getWorkloadsBySchoolYear(
   schoolYear: string
 ) {
   const q =
-    role == "FACULTY"
+    role == "FACULTY" || role == "VALIDATOR"
       ? query(
           collection(db, "workloads", campusId, "workloads"),
           where("createdBy", "==", userId),
@@ -176,7 +176,8 @@ export async function uploadWorkloadToFirestore(
     timestamp: serverTimestamp(),
     createdBy: userId,
     ownerSignature,
-    validationProgress: 0,
+    // validationProgress: -1,
+    submitted: false,
     approved: false,
     validators: validators,
     workloadId: workloadRef.id,
@@ -208,12 +209,14 @@ export function getValidatedWorkloads(
 export function getFacultyWorkloads(
   campusId: string,
   positionIndex: number,
-  setFacultyWorkloads: any
+  setFacultyWorkloads: any,
+  schoolYear: string
 ) {
   const q = query(
     collection(db, "workloads", campusId, "workloads"),
     // where("validators", "array-contains", { uid: "" }),
-    where("validationProgress", "==", positionIndex),
+    // where("validationProgress", "==", positionIndex),
+    where("workload.schoolYear", "==", schoolYear),
     orderBy("timestamp", "desc"),
     limit(10)
   );
@@ -350,12 +353,13 @@ export async function submitWorkload(
     if (isReadyForApproval(validators)) approved = true;
 
     await updateDoc(workloadRef, {
-      validationProgress: increment(1),
+      // validationProgress: increment(1),
+      submitted: true,
       [`validators.${validatorId}.validated`]: true,
       approved: approved,
     });
   } else {
-    await updateDoc(workloadRef, { validationProgress: increment(1) });
+    await updateDoc(workloadRef, { submitted: true });
   }
 }
 
