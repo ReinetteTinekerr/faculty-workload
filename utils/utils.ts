@@ -1,3 +1,4 @@
+import { notification } from "antd";
 import moment from "moment";
 
 export function getSchoolYear(schoolYear: any) {
@@ -19,12 +20,31 @@ export function getCurrentSchoolYear() {
   return lowerYear.toString() + " - " + upperYear.toString();
 }
 
+export function getCurrentSemester() {
+  const currentSchoolYear = getCurrentSchoolYear();
+  const currentYear = new Date().getFullYear().toString();
+  const schoolYearArr = currentSchoolYear.split(" - ");
+  if (schoolYearArr[0] === currentYear) {
+    return "First Semester";
+  } else {
+    return "Second Semester";
+  }
+}
+
 export function getDecrementedSchoolYear(schoolYear: string, i: number) {
   const schoolYearArr = schoolYear.split(" - ");
   return (
     (Number(schoolYearArr[0]) - i).toString() +
     " - " +
     (Number(schoolYearArr[1]) - i).toString()
+  );
+}
+export function getIncrementedSchoolYear(schoolYear: string, i: number) {
+  const schoolYearArr = schoolYear.split(" - ");
+  return (
+    (Number(schoolYearArr[0]) + i).toString() +
+    " - " +
+    (Number(schoolYearArr[1]) + i).toString()
   );
 }
 
@@ -69,10 +89,19 @@ export function getDate(timestamp: number) {
 //   return JSON.parse(JSON.stringify(validators));
 // }
 
-export function getValidators(validatorsData: any, college: string) {
-  const validatorsWithoutDean = validatorsData.filter((member: any) => {
-    return member.position !== "Dean";
-  });
+export function getValidators(
+  validatorsData: any,
+  college: string,
+  selectedProgramChair: any
+) {
+  const validatorsWithoutDeanAndProgramChair = validatorsData.filter(
+    (member: any) => {
+      return (
+        member.position !== "Dean" &&
+        !member.position.includes("Program Chairman")
+      );
+    }
+  );
 
   const dean = validatorsData.filter((member: any) => {
     return (
@@ -80,7 +109,9 @@ export function getValidators(validatorsData: any, college: string) {
       member.college.toUpperCase() === college.toUpperCase()
     );
   });
-  const objValidators = validatorsWithoutDean.reduce(
+  console.log(dean, "dean");
+
+  const objValidators = validatorsWithoutDeanAndProgramChair.reduce(
     (obj: any, item: any) => (
       (obj[item.uid] = { validated: false, ...item }), obj
     ),
@@ -94,13 +125,17 @@ export function getValidators(validatorsData: any, college: string) {
     {}
   );
 
-  // const validators = {
-  //   part1: [...dean, ...validatorsWithoutDean].sort(
-  //     (a, b) => a.positionIndex - b.positionIndex
-  //   ),
-  //   part2: isuCommittee,
-  // };
-  const validators = { ...objValidators, ...objValidatorsDean };
+  const programChair: any = {};
+  programChair[selectedProgramChair.uid] = {
+    validated: false,
+    ...selectedProgramChair,
+  };
+
+  const validators = {
+    ...objValidators,
+    ...objValidatorsDean,
+    ...programChair,
+  };
 
   return JSON.parse(JSON.stringify(validators));
 }
@@ -114,3 +149,24 @@ export function sumValidatorsValidation(validators: object) {
   );
   return totalValidation;
 }
+
+export function groupByKey(array: [any]): { string: [any] } {
+  return array.reduce((obj, item) => {
+    obj[item.workload.college] = obj[item.workload.college] || [];
+    obj[item.workload.college].push(item);
+    return obj;
+    //   if(obj[key] === undefined) return hash;
+    //   return Object.assign(hash, { [obj[key]]:( hash[obj[key]] || [] ).concat(obj)})
+  }, {});
+}
+
+export const openNotification = (title: string, description: string) => {
+  notification.warning({
+    key: "signature",
+    message: title,
+    description: description,
+    // onClick: () => {
+    //   console.log("Notification Clicked!");
+    // },
+  });
+};

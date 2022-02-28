@@ -10,9 +10,11 @@ import { useAuthSession } from "utils/hooks";
 import { UserProfileProps } from "constants/interface/formProps";
 import {
   getCollegeFacultyMembers,
+  getProgramChairmanMembers,
   getWorkloadsBySchoolYear,
 } from "../../firebase/firestoreQueries";
-import { getCurrentSchoolYear } from "utils/utils";
+import { getCurrentSchoolYear, openNotification } from "utils/utils";
+import { notification } from "antd";
 // import {
 //   getApprovedUserWorkloads,
 //   getDraftsUserWorkloads,
@@ -22,6 +24,7 @@ import { getCurrentSchoolYear } from "utils/utils";
 const Faculty: NextPage = () => {
   const [user, loading, error, userRole, userData] = useAuthSession();
   const { activeComponent, selectedItem } = useContext(ActiveComponentContext)!;
+  const [programChairMembers, setProgramChairMembers] = useState<any[]>();
   const [facultyMembers, setFacultyMembers] = useState<
     UserProfileProps[] | null
   >(null);
@@ -35,6 +38,14 @@ const Faculty: NextPage = () => {
       !storedSchoolYear ? getCurrentSchoolYear() : storedSchoolYear
     );
   }, []);
+
+  useEffect(() => {
+    if (!userData) return;
+    getProgramChairmanMembers(userData.campusId).then((data) => {
+      console.log("data: ", data);
+      setProgramChairMembers(data);
+    });
+  }, [userData]);
 
   useEffect(() => {
     if (!userData || userData.role !== "COLLEGE_SECRETARY") return;
@@ -71,6 +82,13 @@ const Faculty: NextPage = () => {
     return <LoadingScreen />;
   }
 
+  if (!userData.signature) {
+    openNotification(
+      "No Signature",
+      "Please provide a signature on your profile"
+    );
+  }
+
   // update to browser router
   switch (activeComponent) {
     case ActiveComponent.WorkloadIndex:
@@ -79,6 +97,7 @@ const Faculty: NextPage = () => {
           user={user}
           userData={userData}
           facultyMembers={facultyMembers}
+          programChairMembers={programChairMembers}
           workloads={workloads}
           selectedSchoolYear={selectedSchoolYear}
           setSelectedSchoolYear={setSelectedSchoolYear}

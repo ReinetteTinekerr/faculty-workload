@@ -161,12 +161,31 @@ export function getCollegeFacultyMembers(
   return unsubscribe;
 }
 
+export async function getProgramChairmanMembers(campusId: string) {
+  const programChairman = "Program Chairman";
+  const programChairs: any[] = [];
+  const q = query(
+    collection(db, "users"),
+    where("campus", "==", campusId),
+    where("position", ">=", programChairman),
+    where("position", "<", programChairman + "\uf8ff")
+  );
+  const docs = await getDocs(q);
+  docs.forEach((doc) => {
+    if (doc.exists()) {
+      programChairs.push(doc.data());
+    }
+  });
+  return programChairs;
+}
+
 export async function uploadWorkloadToFirestore(
   workload: any,
   campusId: string,
   userId: string,
   validators: any,
-  ownerSignature: string
+  ownerSignature: string,
+  programChairUID: string
 ) {
   const workloadRef = doc(collection(db, "workloads", campusId, "workloads"));
   const dataToUpload = {
@@ -181,6 +200,7 @@ export async function uploadWorkloadToFirestore(
     approved: false,
     validators: validators,
     workloadId: workloadRef.id,
+    programChairUID,
   };
   const docRef = await setDoc(workloadRef, dataToUpload);
   return dataToUpload;
@@ -208,18 +228,19 @@ export function getValidatedWorkloads(
 
 export function getFacultyWorkloads(
   campusId: string,
-  positionIndex: number,
   setFacultyWorkloads: any,
-  schoolYear: string
+  selectedSchoolYear: string,
+  selectedSemester: string
 ) {
   const q = query(
     collection(db, "workloads", campusId, "workloads"),
-    // where("validators", "array-contains", { uid: "" }),
     // where("validationProgress", "==", positionIndex),
-    where("workload.schoolYear", "==", schoolYear),
+    where("workload.semester", "==", selectedSemester),
+    where("workload.schoolYear", "==", selectedSchoolYear),
     orderBy("timestamp", "desc"),
-    limit(10)
+    limit(2000)
   );
+
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
     const items: any = [];
     querySnapshot.forEach((doc) => {
@@ -228,6 +249,36 @@ export function getFacultyWorkloads(
 
     setFacultyWorkloads(items);
   });
+  return unsubscribe;
+}
+
+export function getProgramChairs(
+  campusId: string,
+  schoolYear: string,
+  uid: string,
+  setFacultyWorkloads: any,
+  selectedSemester: string
+) {
+  const q = query(
+    collection(db, "workloads", campusId, "workloads"),
+    where("workload.schoolYear", "==", schoolYear),
+    where("workload.semester", "==", selectedSemester),
+    where("programChairUID", "==", uid),
+    orderBy("timestamp", "desc"),
+    limit(2000)
+  );
+
+  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    const items: any[] = [];
+    querySnapshot.forEach((doc) => {
+      if (doc.exists()) {
+        items.push(doc.data());
+      }
+    });
+    setFacultyWorkloads(items);
+    console.log(items, "items");
+  });
+
   return unsubscribe;
 }
 
@@ -259,6 +310,15 @@ export async function getUserProfile(uid: string) {
     return docSnap.data();
   } else {
     return null;
+  }
+}
+
+export async function updateUserProfile(uid: string, profile: object) {
+  const userRef = doc(db, "users", uid);
+  try {
+    await setDoc(userRef, { ...profile }, { merge: true });
+  } catch (error) {
+    console.log(error);
   }
 }
 

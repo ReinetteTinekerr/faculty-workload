@@ -638,7 +638,8 @@ const WorkloadForm = () => {
 
 function PersonalInfo() {
   // console.log(facultyMembers.length, "members");
-  const { form, facultyMembers } = useContext(WorkloadFormContext);
+  const { form, facultyMembers, programChairMembers } =
+    useContext(WorkloadFormContext);
 
   return (
     <>
@@ -1040,9 +1041,16 @@ function PersonalInfo() {
                 .localeCompare(optionB.children.toLowerCase())
             }
           >
-            <Option value="BSCS">BSCS</Option>
+            {programChairMembers?.map((member: any) => {
+              return (
+                <Option key={member.uid} value={member.uid}>
+                  {member.username + ", " + member.position.substring(17)}
+                </Option>
+              );
+            })}
+            {/* <Option value="BSCS">BSCS</Option>
             <Option value="BSIT">BSIT</Option>
-            <Option value="BSIS">BSIS</Option>
+            <Option value="BSIS">BSIS</Option> */}
           </Select>
         </Form.Item>
       </Row>
@@ -1153,7 +1161,7 @@ function Administration() {
           // ]}
           label="Units"
         >
-          <InputNumber min={0} max={20} defaultValue={0} />
+          <InputNumber min={0} max={20} />
         </Form.Item>
       </Col>
       <Col>
