@@ -45,9 +45,14 @@ import {
 } from "../../firebase/firestoreQueries";
 import { WorkloadList } from "components/workload/WorkloadList";
 import WorkloadItem from "components/routes/faculty/WorkloadItem";
-import { getCurrentSchoolYear, groupByKey } from "utils/utils";
+import {
+  getCurrentSchoolYear,
+  getCurrentSemester,
+  groupByKey,
+} from "utils/utils";
 import { SchoolYearTabSelection } from "components/schoolYearTabSelection";
 import { positionKeyValue } from "constants/constants";
+import { SemesterTabSelection } from "components/semesterTabSelection";
 
 const { TabPane } = Tabs;
 const { Panel } = Collapse;
@@ -65,7 +70,9 @@ const Admin: NextPage = () => {
   const [facultyWorkloads, setFacultyWorkloads] = useState<any>(null);
   const [selectedSchoolYear, setSelectedSchoolYear] = useState<string>("");
   const [selectedCollege, setSelectedCollege] = useState<string>("");
-  const [selectedSemester, setSelectedSemester] = useState<string>("");
+  const [selectedSemester, setSelectedSemester] = useState<string>(
+    getCurrentSemester()
+  );
 
   const columns = [
     {
@@ -452,12 +459,12 @@ const Admin: NextPage = () => {
   useEffect(() => {
     const storedSchoolYear = localStorage.getItem("schoolYear");
     const storedCollege = localStorage.getItem("college");
-    const storedSemester = localStorage.getItem("semester");
+    // const storedSemester = localStorage.getItem("semester");
     setSelectedSchoolYear(
       !storedSchoolYear ? getCurrentSchoolYear() : storedSchoolYear
     );
     setSelectedCollege(!storedCollege ? "" : storedCollege);
-    setSelectedSemester(!storedSemester ? "" : storedSemester);
+    // setSelectedSemester(!storedSemester ? "" : storedSemester);
   }, []);
 
   useEffect(() => {
@@ -475,12 +482,13 @@ const Admin: NextPage = () => {
     const unsubscribe = getFacultyWorkloads(
       userData.campus,
       setFacultyWorkloads,
-      selectedSchoolYear
+      selectedSchoolYear,
+      selectedSemester
     );
     return () => {
       unsubscribe();
     };
-  }, [userData, user, selectedSchoolYear]);
+  }, [userData, user, selectedSchoolYear, selectedSemester]);
 
   useEffect(() => {
     if (!userData) return;
@@ -527,10 +535,16 @@ const Admin: NextPage = () => {
               centered
               tabBarExtraContent={{
                 right: (
-                  <SchoolYearTabSelection
-                    selectedSchoolYear={selectedSchoolYear}
-                    setSelectedSchoolYear={setSelectedSchoolYear}
-                  />
+                  <>
+                    <SchoolYearTabSelection
+                      selectedSchoolYear={selectedSchoolYear}
+                      setSelectedSchoolYear={setSelectedSchoolYear}
+                    />
+                    <SemesterTabSelection
+                      selectedSemester={selectedSemester}
+                      setSelectedSemester={setSelectedSemester}
+                    />
+                  </>
                 ),
               }}
             >

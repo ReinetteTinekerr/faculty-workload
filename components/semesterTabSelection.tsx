@@ -17,7 +17,7 @@ export function SemesterTabSelection({
         onSelect={(value) => {
           console.log(value);
           setSelectedSemester(value);
-          localStorage.setItem("schoolYear", value.toString());
+          localStorage.setItem("semester", value.toString());
         }}
         style={{ width: "120px" }}
         placeholder="Type to select"

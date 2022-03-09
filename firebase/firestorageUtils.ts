@@ -6,18 +6,19 @@ import {
 } from "firebase/storage";
 import { storage } from "../firebase/clientApp";
 
-export async function uploadImage(image: string, uid: string) {
+export async function uploadSignature(imageDataUrl: string, uid: string) {
   const userSignatureRef = ref(storage, `signatures/${uid}/signature`);
   const metadata = {
     contentType: "image/jpeg",
   };
-  if (typeof image === "string") {
+  if (typeof imageDataUrl === "string") {
     const snapshot = await uploadString(
       userSignatureRef,
-      image,
+      imageDataUrl,
       "data_url",
       metadata
     );
+    console.log(snapshot.metadata.fullPath);
     return snapshot;
   } else {
   }

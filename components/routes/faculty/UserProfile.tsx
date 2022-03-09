@@ -22,7 +22,11 @@ import { ActiveComponentContext } from "context/activeComponentContext";
 import Head from "next/head";
 import { createRef, useContext, useEffect, useState } from "react";
 import SignaturePad from "react-signature-pad-wrapper";
-import { getImageURL, uploadImage } from "../../../firebase/firestorageUtils";
+import { convertFileObjToDataUrl } from "utils/utils";
+import {
+  getImageURL,
+  uploadSignature,
+} from "../../../firebase/firestorageUtils";
 import {
   getUserProfileFromCacheElseServer,
   updateUserProfile,
@@ -189,17 +193,17 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
                   type="primary"
                   onClick={async () => {
                     console.log(signatureUpload);
+                    let imageDataUrl: any = null;
                     if (
                       signatureUpload !== null &&
                       signatureUpload.length > 0
                     ) {
-                      setIsSignatureSaving(true);
                       let reader = new FileReader();
                       reader.readAsDataURL(signatureUpload[0].originFileObj);
                       reader.onload = async (e) => {
-                        const dataUrl = reader.result as string;
+                        imageDataUrl = reader.result;
                         try {
-                          await uploadImage(dataUrl, uid);
+                          await uploadSignature(imageDataUrl, uid);
                           message.success("Success");
 
                           setUserSignature(
@@ -213,19 +217,21 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
                           message.success("Something went wrong");
                         }
                       };
-                      setIsSignatureSaving(false);
-                      setEditSignature(false);
+
                       return;
                     }
-                    if (signaturePadRef.current?.isEmpty()) {
+                    if (
+                      signaturePadRef.current?.isEmpty() &&
+                      imageDataUrl === null
+                    ) {
                       message.error("Signature must not be empty!");
-                      setEditSignature(false);
                       return;
                     }
+
+                    imageDataUrl =
+                      imageDataUrl || signaturePadRef.current!.toDataURL();
                     setIsSignatureSaving(true);
-                    const image = signaturePadRef.current?.toDataURL();
-                    if (image === undefined) return;
-                    await uploadImage(image, uid);
+                    await uploadSignature(imageDataUrl, uid);
                     const url = await getImageURL(uid);
                     if (url === null) return;
                     const urlWithoutToken = url.split("&token")[0];

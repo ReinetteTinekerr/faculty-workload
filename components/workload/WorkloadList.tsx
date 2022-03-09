@@ -17,13 +17,7 @@ import { getDate, sumValidatorsValidation } from "utils/utils";
 const { Text, Title } = Typography;
 const { Panel } = Collapse;
 
-export function WorkloadList({
-  workloads,
-  userRole,
-  userPositionIndex,
-  selectedSemester,
-  setSelectedSemester,
-}: any) {
+export function WorkloadList({ workloads, userRole, userPositionIndex }: any) {
   const { setActiveComponent, setSelectedItem } = useContext(
     ActiveComponentContext
   )!;
@@ -55,7 +49,6 @@ export function WorkloadList({
     "Second Semester": secondSemWorkloads,
     Summer: summerWorkloads,
   };
-  console.log(selectedSemester);
 
   return (
     <>

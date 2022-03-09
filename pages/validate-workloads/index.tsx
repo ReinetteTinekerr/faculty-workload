@@ -76,7 +76,6 @@ const ValidateWorkloads: NextPage = () => {
   useEffect(() => {
     if (!userData || !user) return;
     if (!userData.position.toLowerCase().includes("program chairman")) return;
-    console.log("no");
 
     const unsubscribe = getProgramChairs(
       userData.campusId,

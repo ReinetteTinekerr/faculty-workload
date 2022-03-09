@@ -170,3 +170,12 @@ export const openNotification = (title: string, description: string) => {
     // },
   });
 };
+
+export const convertFileObjToDataUrl = (fileObj: any, imageUrl: any) => {
+  let imageDataUrl: null | ArrayBuffer | string = null;
+  let reader = new FileReader();
+  reader.readAsDataURL(fileObj);
+  reader.onload = (e) => {
+    imageUrl = reader.result;
+  };
+};
