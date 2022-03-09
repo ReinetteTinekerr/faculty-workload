@@ -36,6 +36,7 @@ export function WorkloadModal({
   user,
   userData,
   facultyMembers,
+  programChairMembers,
   workloads,
 }: ShowModalProps) {
   facultyMembers = facultyMembers === undefined ? null : facultyMembers;
@@ -47,7 +48,11 @@ export function WorkloadModal({
   const [workloadUsers, setWorkloadUsers] = useState(null);
   const formInitialValues =
     userData?.role === "COLLEGE_SECRETARY"
-      ? { campus: userData?.campus, college: userData?.college }
+      ? {
+          campus: userData?.campus,
+          college: userData?.college,
+          positionUnits: 0,
+        }
       : {
           name: userData?.username,
           masteral: userData?.masteral,
@@ -55,6 +60,7 @@ export function WorkloadModal({
           campus: userData?.campus,
           doctorate: userData?.doctorate,
           baccalaureate: userData?.baccalaureate,
+          positionUnits: 0,
         };
 
   useEffect(() => {
@@ -117,6 +123,11 @@ export function WorkloadModal({
         }
       }
 
+      const selectedProgramChair = programChairMembers?.filter(
+        (member: any) => member.uid === values.programChair
+      )[0];
+      // console.log(selectedProgramChair);
+
       if (!faculty.signature) {
         message.error("Please provide a signature");
         return { success: false };
@@ -126,7 +137,8 @@ export function WorkloadModal({
         values,
         faculty.uid,
         faculty!.campusId,
-        faculty!.signature
+        faculty!.signature,
+        selectedProgramChair
       );
       message.success("Workload created Woohoo!");
 
@@ -173,7 +185,9 @@ export function WorkloadModal({
         name="createWorkload"
         scrollToFirstError
       >
-        <WorkloadFormContext.Provider value={{ form, facultyMembers }}>
+        <WorkloadFormContext.Provider
+          value={{ form, facultyMembers, programChairMembers }}
+        >
           <WorkloadForm />
         </WorkloadFormContext.Provider>
       </Form>
@@ -184,7 +198,8 @@ async function updateAndUploadValuesToFirestore(
   values: WorkloadDataProps,
   userId: string,
   campusId: string,
-  ownerSignature: string
+  ownerSignature: string,
+  selectedProgramChair: any
 ) {
   // const campusRef = doc(db, "campuses", campusId);
   // const campusSnap = await getDoc(campusRef);
@@ -197,9 +212,15 @@ async function updateAndUploadValuesToFirestore(
   //
   //   return;
   // }
+
   const validatorsData = await getUsersByCampusAndRole(campusId, "VALIDATOR");
 
-  const validators = getValidators(validatorsData, values.college);
+  const validators = getValidators(
+    validatorsData,
+    values.college,
+    selectedProgramChair
+  );
+  console.log(validators, "validators");
 
   const withTotalOfWorkloads = EvaluateWorkload(values);
 
@@ -208,7 +229,8 @@ async function updateAndUploadValuesToFirestore(
     campusId,
     userId,
     validators,
-    ownerSignature
+    ownerSignature,
+    selectedProgramChair.uid
   );
 
   return uploadedWorkload;

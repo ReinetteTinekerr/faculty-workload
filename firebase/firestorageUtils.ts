@@ -1,13 +1,28 @@
-import { getDownloadURL, ref, uploadString } from "firebase/storage";
+import {
+  getDownloadURL,
+  ref,
+  uploadString,
+  uploadBytes,
+} from "firebase/storage";
 import { storage } from "../firebase/clientApp";
 //test develop branch
 
-export async function uploadImage(image: string, uid: string) {
+export async function uploadSignature(imageDataUrl: string, uid: string) {
   const userSignatureRef = ref(storage, `signatures/${uid}/signature`);
-  const snapshot = await uploadString(userSignatureRef, image, "data_url", {
-    // cacheControl: "no-cache",
-  });
-  return snapshot;
+  const metadata = {
+    contentType: "image/jpeg",
+  };
+  if (typeof imageDataUrl === "string") {
+    const snapshot = await uploadString(
+      userSignatureRef,
+      imageDataUrl,
+      "data_url",
+      metadata
+    );
+    console.log(snapshot.metadata.fullPath);
+    return snapshot;
+  } else {
+  }
 }
 
 export async function getImageURL(uid: string) {

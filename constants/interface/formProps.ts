@@ -28,6 +28,7 @@ export interface WorkloadDataProps {
   excessFacultyWorkload?: number;
   extensionProductionSum?: number;
   positionUnits: number;
+  programChair?: string;
 }
 
 export interface WorkloadToUploadProps {
@@ -84,6 +85,7 @@ export interface UserProfileProps {
     uid: string;
     username: string;
     signature: string;
+    address?: string;
   };
 }
 

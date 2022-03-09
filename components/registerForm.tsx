@@ -1,4 +1,14 @@
-import { Button, Col, Form, Input, Row, Select, message } from "antd";
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  Row,
+  Select,
+  message,
+  AutoComplete,
+} from "antd";
+import { positionKeyValue } from "constants/constants";
 import { useState } from "react";
 
 const { Option } = Select;
@@ -18,11 +28,31 @@ export interface RegisterFormProps {
   extension: string;
 }
 
+const isInvalidPosition = (selectedPosition: string, selectedRole: string) => {
+  let positionIndex = -1;
+
+  Object.entries(positionKeyValue).forEach(([key, value]) => {
+    if (selectedPosition.toLowerCase().includes(key.toLowerCase())) {
+      positionIndex = value;
+    }
+  });
+
+  if (positionIndex !== -1 && selectedRole === "VALIDATOR") return false;
+  if (selectedRole !== "VALIDATOR" && selectedRole !== "ADMIN") return false;
+  return true;
+};
+
 export default function RegisterAccount() {
   const [isItemSelected, setIsItemSelected] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [form] = Form.useForm();
 
   const onFinish = async (values: RegisterFormProps) => {
+    if (isInvalidPosition(values.position, values.role)) {
+      message.error("Invalid position");
+      return;
+    }
+
     setLoading(true);
     const res = await fetch(`/api/register`, {
       body: JSON.stringify(values),
@@ -40,11 +70,13 @@ export default function RegisterAccount() {
     } else {
       message.error(data.error.message);
     }
+    console.log(values);
   };
 
   return (
     <>
       <Form
+        form={form}
         name="register"
         size="small"
         // form={form}
@@ -441,7 +473,10 @@ export default function RegisterAccount() {
                 onSelect={(role: any) => {
                   if (role === "VALIDATOR") {
                     setIsItemSelected(true);
-                  } else setIsItemSelected(false);
+                  } else {
+                    setIsItemSelected(false);
+                    form.setFieldsValue({ position: "NONE" });
+                  }
                 }}
                 showSearch
                 style={{
@@ -481,43 +516,22 @@ export default function RegisterAccount() {
                 },
               ]}
             >
-              <Select
-                onSelect={(data: any) => {}}
+              <AutoComplete
                 disabled={!isItemSelected}
-                showSearch
-                style={{
-                  width: 200,
-                }}
-                placeholder="Type to select"
-                optionFilterProp="children"
-                filterOption={(input, option: any) => {
-                  return (
-                    option?.children
-                      ?.toString()
-                      .toLowerCase()
-                      .indexOf(input.toLowerCase()) >= 0
-                  );
-                }}
-                filterSort={(optionA, optionB) =>
-                  optionA.children
-                    .toLowerCase()
-                    .localeCompare(optionB.children.toLowerCase())
-                }
-              >
-                <Option value="Program Chairman, Graduate Studies">
-                  Program Chairman, Graduate Studies
-                </Option>
-                <Option value="Dean">Dean</Option>
-                <Option value="Executive Officer, ISUCC">
-                  Executive Officer, ISUCC
-                </Option>
-                <Option value="Campus Registrar">Campus Registrar</Option>
-                <Option value="President, ISUCCFA">President, ISUCCFA</Option>
-                <Option value="Director, ARA">Director, ARA</Option>
-                <Option value="University Workload Committee">
-                  University Workload Committee
-                </Option>
-              </Select>
+                filterOption={true}
+                style={{ width: 200 }}
+                onSelect={(value) => {}}
+                dataSource={[
+                  "Program Chairman, BSCS",
+                  "Dean",
+                  "Executive Officer, ISUCC",
+                  "Campus Registrar",
+                  "President, ISUCCFA",
+                  "Director, ARA",
+                  "University Workload Committee",
+                ]}
+                placeholder="Position"
+              />
             </Form.Item>
           </Col>
         </Row>

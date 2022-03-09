@@ -17,13 +17,7 @@ import { getDate, sumValidatorsValidation } from "utils/utils";
 const { Text, Title } = Typography;
 const { Panel } = Collapse;
 
-export function WorkloadList({
-  workloads,
-  userRole,
-  userPositionIndex,
-  selectedSemester,
-  setSelectedSemester,
-}: any) {
+export function WorkloadList({ workloads, userRole, userPositionIndex }: any) {
   const { setActiveComponent, setSelectedItem } = useContext(
     ActiveComponentContext
   )!;
@@ -55,96 +49,98 @@ export function WorkloadList({
     "Second Semester": secondSemWorkloads,
     Summer: summerWorkloads,
   };
-  console.log(selectedSemester);
 
   return (
     <>
       <Collapse
         style={{ width: "90%", margin: "auto" }}
-        defaultActiveKey={
-          userRole === "VALIDATOR"
-            ? selectedSemester
-            : ["First Semester", "Second Semester", "Summer"]
-        }
+        defaultActiveKey={["First Semester", "Second Semester", "Summer"]}
         accordion={userRole === "VALIDATOR" ? true : false}
         onChange={(value) => {
           console.log("collapse", value);
-          if (setSelectedSemester) {
-            setSelectedSemester(value ? value.toString() : "");
-            localStorage.setItem("semester", value ? value.toString() : "");
-          }
+          // if (setSelectedSemester) {
+          //   setSelectedSemester(value ? value.toString() : "");
+          //   localStorage.setItem("semester", value ? value.toString() : "");
+          // }
         }}
       >
         {Object.entries(workloadsPerSemester).map(([key, value]) => {
           return (
-            <Panel
-              header={<Title level={5}>{key}</Title>}
-              extra={`Total: ${value.length}`}
-              key={key}
-            >
-              <div style={{ overflow: "auto" }}>
-                <List
-                  bordered
-                  size="small"
-                  itemLayout="horizontal"
-                  dataSource={value}
-                  style={{
-                    paddingLeft: "12px",
-                    paddingRight: "12px",
-                  }}
-                  renderItem={(item: any, index) => (
-                    <RibbonBadge
-                      // validationProgress={item.workload.validationProgress}
-                      isSubmitted={item.submitted}
-                      userRole={userRole}
-                      userPositionIndex={userPositionIndex}
-                      validators={item.validators}
-                      isApproved={item.approved}
-                    >
-                      <List.Item
-                        className={styles.listItem}
-                        onClick={() => {
-                          setSelectedItem(item);
-                          setActiveComponent(ActiveComponent.WorkloadItem);
-                        }}
-                      >
-                        <List.Item.Meta
-                          avatar={
-                            <Avatar style={{ background: "#f56a00" }}>
-                              {item.workload.name[0]}
-                            </Avatar>
-                          }
-                          title={
-                            <a>
-                              <span style={{ paddingRight: "15px" }}>
-                                {item.workload.name}, {item.workload.doctorate}
-                              </span>
-                              <Tag color={"default"}>
-                                TOTAL FACULTY WORKLOAD:{" "}
+            <>
+              {value.length > 0 ? (
+                <Panel
+                  header={<Title level={5}>{key}</Title>}
+                  // extra={`Total: ${value.length}`}
+                  key={key}
+                >
+                  <div style={{ overflow: "auto" }}>
+                    <List
+                      bordered
+                      size="small"
+                      itemLayout="horizontal"
+                      dataSource={value}
+                      style={{
+                        paddingLeft: "12px",
+                        paddingRight: "12px",
+                      }}
+                      renderItem={(item: any, index) => (
+                        <RibbonBadge
+                          // validationProgress={item.workload.validationProgress}
+                          isSubmitted={item.submitted}
+                          userRole={userRole}
+                          userPositionIndex={userPositionIndex}
+                          validators={item.validators}
+                          isApproved={item.approved}
+                        >
+                          <List.Item
+                            className={styles.listItem}
+                            onClick={() => {
+                              setSelectedItem(item);
+                              setActiveComponent(ActiveComponent.WorkloadItem);
+                            }}
+                          >
+                            <List.Item.Meta
+                              avatar={
+                                <Avatar style={{ background: "#f56a00" }}>
+                                  {item.workload.name[0]}
+                                </Avatar>
+                              }
+                              title={
+                                <a>
+                                  <span style={{ paddingRight: "15px" }}>
+                                    {item.workload.name},{" "}
+                                    {item.workload.doctorate}
+                                  </span>
+                                  <Tag color={"default"}>
+                                    TOTAL FACULTY WORKLOAD:{" "}
+                                    <Text strong>
+                                      {item.workload.totalFacultyWorkload}
+                                    </Text>
+                                  </Tag>
+                                </a>
+                              }
+                              description={<></>}
+                            />
+                            <List.Item
+                              extra={<WorkloadProgress workload={item} />}
+                            ></List.Item>
+                            <List.Item
+                              extra={
                                 <Text strong>
-                                  {item.workload.totalFacultyWorkload}
+                                  {getDate(item.workload.createdAt)}
                                 </Text>
-                              </Tag>
-                            </a>
-                          }
-                          description={<></>}
-                        />
-                        <List.Item
-                          extra={<WorkloadProgress workload={item} />}
-                        ></List.Item>
-                        <List.Item
-                          extra={
-                            <Text strong>
-                              {getDate(item.workload.createdAt)}
-                            </Text>
-                          }
-                        ></List.Item>
-                      </List.Item>
-                    </RibbonBadge>
-                  )}
-                />
-              </div>
-            </Panel>
+                              }
+                            ></List.Item>
+                          </List.Item>
+                        </RibbonBadge>
+                      )}
+                    />
+                  </div>
+                </Panel>
+              ) : (
+                <></>
+              )}
+            </>
           );
         })}
       </Collapse>

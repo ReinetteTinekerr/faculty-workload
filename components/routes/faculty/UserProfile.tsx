@@ -12,6 +12,7 @@ import {
   Image,
   Tag,
   message,
+  Upload,
 } from "antd";
 import Avatar from "antd/lib/avatar/avatar";
 import { Content } from "antd/lib/layout/layout";
@@ -21,9 +22,14 @@ import { ActiveComponentContext } from "context/activeComponentContext";
 import Head from "next/head";
 import { createRef, useContext, useEffect, useState } from "react";
 import SignaturePad from "react-signature-pad-wrapper";
-import { getImageURL, uploadImage } from "../../../firebase/firestorageUtils";
+import { convertFileObjToDataUrl } from "utils/utils";
+import {
+  getImageURL,
+  uploadSignature,
+} from "../../../firebase/firestorageUtils";
 import {
   getUserProfileFromCacheElseServer,
+  updateUserProfile,
   updateUserSignature,
 } from "../../../firebase/firestoreQueries";
 
@@ -37,6 +43,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
   const [isSignatureSaving, setIsSignatureSaving] = useState(false);
   const [loading, setLoading] = useState(false);
   const signaturePadRef = createRef<SignaturePad>();
+  const [signatureUpload, setSignatureUpload] = useState<any>(null);
   const [form] = Form.useForm();
   const {
     baccalaureate,
@@ -51,15 +58,9 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
     username,
     uid,
     signature,
+    address,
   } = userData!;
   const [userSignature, setUserSignature] = useState(signature);
-
-  const showProfileModal = () => {
-    setIsProfileModalVisible(true);
-  };
-  const showSignatureModal = () => {
-    setIsSignatureModalVisible(true);
-  };
 
   const handleOk = () => {
     setIsProfileModalVisible(false);
@@ -86,7 +87,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
           margin: "auto",
         }}
       >
-        <Content style={{ width: "60%", margin: "auto", background: "#fff" }}>
+        <Content style={{ width: "70%", margin: "auto", background: "#fff" }}>
           <PageHeader
             className="site-page-header"
             title={
@@ -106,10 +107,18 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
               setActiveComponent(ActiveComponent.WorkloadIndex);
             }}
             extra={[
-              <Button key="1" type="default" onClick={showSignatureModal}>
+              <Button
+                key="1"
+                type="default"
+                onClick={() => setIsSignatureModalVisible(true)}
+              >
                 SIGNATURE
               </Button>,
-              <Button key="2" type="primary" onClick={showProfileModal}>
+              <Button
+                key="2"
+                type="primary"
+                onClick={() => setIsProfileModalVisible(true)}
+              >
                 EDIT
               </Button>,
             ]}
@@ -121,7 +130,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
           >
             <Descriptions.Item label="Name">{username}</Descriptions.Item>
             <Descriptions.Item label="Email">{email}</Descriptions.Item>
-            <Descriptions.Item label="Address">.</Descriptions.Item>
+            <Descriptions.Item label="Address">{address}</Descriptions.Item>
             <Descriptions.Item label="Position">
               <Badge color={"lime"} /> {position}
             </Descriptions.Item>
@@ -177,20 +186,52 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
                 >
                   EDIT
                 </Button>
+
                 <Button
                   disabled={isSignatureSaving || !editSignature}
                   key={"ok"}
                   type="primary"
                   onClick={async () => {
-                    if (signaturePadRef.current?.isEmpty()) {
-                      message.error("Signature must not be empty!");
-                      setEditSignature(false);
+                    console.log(signatureUpload);
+                    let imageDataUrl: any = null;
+                    if (
+                      signatureUpload !== null &&
+                      signatureUpload.length > 0
+                    ) {
+                      let reader = new FileReader();
+                      reader.readAsDataURL(signatureUpload[0].originFileObj);
+                      reader.onload = async (e) => {
+                        imageDataUrl = reader.result;
+                        try {
+                          await uploadSignature(imageDataUrl, uid);
+                          message.success("Success");
+
+                          setUserSignature(
+                            userSignature.split("&token=")[0] +
+                              "&token=" +
+                              Date.now().toString()
+                          );
+                          setSignatureUpload(null);
+                          // await getUserProfileFromCacheElseServer(uid, true);
+                        } catch (error) {
+                          message.success("Something went wrong");
+                        }
+                      };
+
                       return;
                     }
+                    if (
+                      signaturePadRef.current?.isEmpty() &&
+                      imageDataUrl === null
+                    ) {
+                      message.error("Signature must not be empty!");
+                      return;
+                    }
+
+                    imageDataUrl =
+                      imageDataUrl || signaturePadRef.current!.toDataURL();
                     setIsSignatureSaving(true);
-                    const image = signaturePadRef.current?.toDataURL();
-                    if (image === undefined) return;
-                    await uploadImage(image, uid);
+                    await uploadSignature(imageDataUrl, uid);
                     const url = await getImageURL(uid);
                     if (url === null) return;
                     const urlWithoutToken = url.split("&token")[0];
@@ -209,6 +250,34 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
                 >
                   {isSignatureSaving ? "SAVING..." : "SAVE"}
                 </Button>
+                {" | "}
+                <Upload
+                  accept=".png, .pjg"
+                  maxCount={1}
+                  beforeUpload={(file) => {
+                    return false;
+                  }}
+                  onChange={({ fileList }) => {
+                    if (
+                      fileList.length <= 0 ||
+                      fileList[0].originFileObj === undefined
+                    )
+                      return;
+
+                    setSignatureUpload(fileList);
+                  }}
+                >
+                  <Button
+                    disabled={!editSignature}
+                    key={"upload"}
+                    onClick={() => {
+                      // setEditSignature(true);
+                      // signaturePadRef.current?.clear();
+                    }}
+                  >
+                    UPLOAD
+                  </Button>
+                </Upload>
               </>,
             ]}
           >
@@ -259,6 +328,10 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
                 onClick={async () => {
                   try {
                     const values = await form.validateFields();
+                    console.log("test", values);
+                    await updateUserProfile(uid, values);
+                    setIsProfileModalVisible(false);
+                    message.success("Profile updated");
                   } catch (error) {}
                   // setLoading(true);
                   // const { success } = await onCheck();
@@ -275,16 +348,15 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
             <Form
               name="profile"
               form={form}
-              // labelCol={{ span: 4 }}
               layout={"vertical"}
-              // wrapperCol={{ span: 16 }}
               initialValues={{
                 username: userData!.username,
-                baccalaureate: baccalaureate,
+                baccalaureate,
                 masteral,
                 doctorate,
                 college,
                 campus,
+                address: address === undefined ? "" : address,
               }}
               onFinish={onFinish}
               autoComplete="off"

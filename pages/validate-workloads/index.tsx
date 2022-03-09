@@ -18,11 +18,18 @@ import WorkloadItem from "components/routes/faculty/WorkloadItem";
 import { WorkloadList } from "components/workload/WorkloadList";
 import {
   getFacultyWorkloads,
+  getProgramChairs,
   getValidatedWorkloads,
 } from "../../firebase/firestoreQueries";
 import Head from "next/head";
-import { getCurrentSchoolYear } from "utils/utils";
+import {
+  getCurrentSchoolYear,
+  getCurrentSemester,
+  groupByKey,
+  openNotification,
+} from "utils/utils";
 import { SchoolYearTabSelection } from "components/schoolYearTabSelection";
+import { SemesterTabSelection } from "components/semesterTabSelection";
 const { TabPane } = Tabs;
 const { Panel } = Collapse;
 const { Title } = Typography;
@@ -35,44 +42,60 @@ const ValidateWorkloads: NextPage = () => {
     useContext(ActiveComponentContext)!;
   const [selectedSchoolYear, setSelectedSchoolYear] = useState<string>("");
   const [selectedCollege, setSelectedCollege] = useState<string>("");
-  const [selectedSemester, setSelectedSemester] = useState<string>("");
+  const [selectedSemester, setSelectedSemester] = useState<string>(
+    getCurrentSemester()
+  );
 
   useEffect(() => {
     const storedSchoolYear = localStorage.getItem("schoolYear");
     const storedCollege = localStorage.getItem("college");
-    const storedSemester = localStorage.getItem("semester");
+    // const storedSemester = localStorage.getItem("semester");
     setSelectedSchoolYear(
       !storedSchoolYear ? getCurrentSchoolYear() : storedSchoolYear
     );
     setSelectedCollege(!storedCollege ? "" : storedCollege);
-    setSelectedSemester(!storedSemester ? "" : storedSemester);
+    // setSelectedSemester(!storedSemester ? "" : storedSemester);
   }, []);
 
   useEffect(() => {
     if (!userData || !user) return;
-    getFacultyWorkloads(
+    if (userData.position.toLowerCase().includes("program chairman")) return;
+
+    const unsubscribe = getFacultyWorkloads(
       userData.campus,
-      userData.positionIndex,
       setFacultyWorkloads,
-      selectedSchoolYear
+      selectedSchoolYear,
+      selectedSemester
     );
-  }, [userData, user, selectedSchoolYear]);
 
-  // useEffect(() => {
-  //   if (!userData || !user) return;
-  //   const unsubscribe = getValidatedWorkloads(
-  //     userData.campusId,
-  //     userData.positionIndex,
-  //     setValidatedWorkloads
-  //   );
-  // }, [userData, user]);
+    return () => {
+      unsubscribe();
+    };
+  }, [userData, selectedSchoolYear, selectedSemester]);
 
-  if (loading || !userRole || !facultyWorkloads || !user) {
+  useEffect(() => {
+    if (!userData || !user) return;
+    if (!userData.position.toLowerCase().includes("program chairman")) return;
+
+    const unsubscribe = getProgramChairs(
+      userData.campusId,
+      selectedSchoolYear,
+      userData.uid,
+      setFacultyWorkloads,
+      selectedSemester
+    );
+    return () => {
+      unsubscribe();
+    };
+  }, [selectedSchoolYear, selectedSemester, userData]);
+
+  if (loading || !userRole || !facultyWorkloads || !user || !userData) {
     return <LoadingScreen />;
   }
 
+  console.log(loading, facultyWorkloads, user);
+
   const groupByCollegeWorkloads = groupByKey(facultyWorkloads);
-  console.log(groupByCollegeWorkloads);
 
   if (activeComponent === ActiveComponent.Profile) {
     return <UserProfile userData={userData} />;
@@ -85,6 +108,12 @@ const ValidateWorkloads: NextPage = () => {
         positionIndex={userData.positionIndex}
         campusId={userData.campusId}
       />
+    );
+  }
+  if (!userData.signature) {
+    openNotification(
+      "No Signature",
+      "Please provide a signature on your profile"
     );
   }
   console.log(groupByCollegeWorkloads);
@@ -110,10 +139,16 @@ const ValidateWorkloads: NextPage = () => {
               centered
               tabBarExtraContent={{
                 right: (
-                  <SchoolYearTabSelection
-                    selectedSchoolYear={selectedSchoolYear}
-                    setSelectedSchoolYear={setSelectedSchoolYear}
-                  />
+                  <>
+                    <SchoolYearTabSelection
+                      selectedSchoolYear={selectedSchoolYear}
+                      setSelectedSchoolYear={setSelectedSchoolYear}
+                    />
+                    <SemesterTabSelection
+                      selectedSemester={selectedSemester}
+                      setSelectedSemester={setSelectedSemester}
+                    />
+                  </>
                 ),
               }}
             >
@@ -162,29 +197,7 @@ const ValidateWorkloads: NextPage = () => {
                 ) : (
                   <Empty></Empty>
                 )}
-
-                {/* <WorkloadList workloads={facultyWorkloads} /> */}
               </TabPane>
-              {/* <TabPane
-                tab={
-                  <span>
-                    <FormOutlined /> Pending
-                  </span>
-                }
-                key="2"
-              >
-                <WorkloadList workloads={facultyWorkloads} />
-              </TabPane>
-              <TabPane
-                tab={
-                  <span>
-                    <AuditOutlined /> Validated
-                  </span>
-                }
-                key="3"
-              >
-                <WorkloadList workloads={validatedWorkloads} />
-              </TabPane> */}
             </Tabs>
           </Content>
         </Layout>
@@ -194,13 +207,3 @@ const ValidateWorkloads: NextPage = () => {
 };
 
 export default ValidateWorkloads;
-
-function groupByKey(array: [any]): { string: [any] } {
-  return array.reduce((obj, item) => {
-    obj[item.workload.college] = obj[item.workload.college] || [];
-    obj[item.workload.college].push(item);
-    return obj;
-    //   if(obj[key] === undefined) return hash;
-    //   return Object.assign(hash, { [obj[key]]:( hash[obj[key]] || [] ).concat(obj)})
-  }, {});
-}

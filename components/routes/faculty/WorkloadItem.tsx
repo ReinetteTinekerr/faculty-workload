@@ -284,16 +284,41 @@ function NameTitleSignatureField({
   );
 }
 
-function WorkloadCommitteeField({ name }: { name: string }) {
+function WorkloadCommitteeField({
+  name,
+  signature,
+  validated,
+}: {
+  name: string;
+  signature: string;
+  validated: boolean;
+}) {
+  console.log(signature, "sig", name, validated);
+
   return (
-    <Row
-      justify="center"
-      style={{
-        borderBottom: "1px solid black",
-      }}
-    >
-      {name}
-    </Row>
+    <>
+      <Row justify="center" style={{ height: "10px" }}>
+        {signature && validated ? (
+          <div
+            style={{
+              position: "relative",
+              bottom: "20px",
+              // display: "inline-block",
+            }}
+          >
+            <Image width={180} height={60} src={signature} alt="Signature" />
+          </div>
+        ) : null}
+      </Row>
+      <Row
+        justify="center"
+        style={{
+          borderBottom: "1px solid black",
+        }}
+      >
+        {name}
+      </Row>
+    </>
   );
 }
 
@@ -700,13 +725,31 @@ class WorkloadFormToPrint extends Component<{
                       University Workload Committee:
                     </Row>
                     <br />
-                    <WorkloadCommitteeField name="" />
-                    <br />
-                    <WorkloadCommitteeField name="" />
-                    <br />
-                    <WorkloadCommitteeField name="" />
-                    <br />
-                    <WorkloadCommitteeField name="" />
+                    <WorkloadCommitteeField
+                      name={this.props.validators[6]?.username}
+                      signature={this.props.validators[6]?.signature}
+                      validated={this.props.validators[6]?.validated}
+                    />
+                    <WorkloadCommitteeField
+                      name={this.props.validators[7]?.username}
+                      signature={this.props.validators[7]?.signature}
+                      validated={this.props.validators[6]?.validated}
+                    />
+                    <WorkloadCommitteeField
+                      name={this.props.validators[8]?.username}
+                      signature={this.props.validators[8]?.signature}
+                      validated={this.props.validators[6]?.validated}
+                    />
+                    <WorkloadCommitteeField
+                      name={this.props.validators[9]?.username}
+                      signature={this.props.validators[9]?.signature}
+                      validated={this.props.validators[6]?.validated}
+                    />
+                    <WorkloadCommitteeField
+                      name={this.props.validators[10]?.username}
+                      signature={this.props.validators[10]?.signature}
+                      validated={this.props.validators[6]?.validated}
+                    />
                     <br />
                   </Col>
                 </Row>

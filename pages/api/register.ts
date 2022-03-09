@@ -2,27 +2,25 @@ import { RegisterFormProps } from "components/registerForm";
 import { adminAuth, adminFirestore } from "../../firebase/adminApp";
 import { NextApiRequest, NextApiResponse } from "next";
 import { FieldValue } from "firebase-admin/firestore";
+import { positionKeyValue } from "constants/constants";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   const userData: RegisterFormProps = req.body;
-  const positionKeyValue: any = {
-    "Program Chairman, Graduate Studies": 1,
-    Dean: 2,
-    "Executive Officer, ISUCC": 3,
-    "Campus Registrar": 4,
-    "President, ISUCCFA": 5,
-    "Director, ARA": 6,
-    "University Workload Committee": 7,
-  };
 
   const { password, username, email, position } = userData;
 
   let positionIndex = -1;
   if (position !== "NONE") {
-    positionIndex = positionKeyValue[position];
+    Object.entries(positionKeyValue).forEach(([key, value]) => {
+      if (position.toLowerCase().includes(key.toLowerCase())) {
+        positionIndex = value;
+        return;
+      }
+    });
+    // positionIndex = positionKeyValue[position];
   }
 
   try {

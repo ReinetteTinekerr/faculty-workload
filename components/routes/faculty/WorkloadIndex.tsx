@@ -12,6 +12,7 @@ export default function WorkloadIndex({
   workloads,
   selectedSchoolYear,
   setSelectedSchoolYear,
+  programChairMembers,
 }: any) {
   const [visible, setVisible] = useState(false);
 
@@ -38,6 +39,7 @@ export default function WorkloadIndex({
             user={user}
             userData={userData}
             facultyMembers={facultyMembers}
+            programChairMembers={programChairMembers}
           />
         </Layout>
       </WorkloadLayout>

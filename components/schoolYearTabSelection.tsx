@@ -1,4 +1,8 @@
-import { getCurrentSchoolYear, getDecrementedSchoolYear } from "utils/utils";
+import {
+  getCurrentSchoolYear,
+  getDecrementedSchoolYear,
+  getIncrementedSchoolYear,
+} from "utils/utils";
 import { Select, Typography } from "antd";
 
 const { Option } = Select;
@@ -13,7 +17,7 @@ export function SchoolYearTabSelection({
     <>
       <Text strong> School Year:</Text>{" "}
       <Select
-        showSearch
+        // showSearch
         onSelect={(value) => {
           console.log(value);
           setSelectedSchoolYear(value);
@@ -37,10 +41,14 @@ export function SchoolYearTabSelection({
             .localeCompare(optionA.children.toLowerCase())
         }
       >
-        {[...new Array(10).keys()].map((_: any, i: number) => {
+        {[...new Array(5).keys()].map((_: any, i: number) => {
+          const incrementedSchoolYear = getIncrementedSchoolYear(schoolYear, 1);
           return (
-            <Option key={i} value={getDecrementedSchoolYear(schoolYear, i)}>
-              {getDecrementedSchoolYear(schoolYear, i)}
+            <Option
+              key={i}
+              value={getDecrementedSchoolYear(incrementedSchoolYear, i)}
+            >
+              {getDecrementedSchoolYear(incrementedSchoolYear, i)}
             </Option>
           );
         })}

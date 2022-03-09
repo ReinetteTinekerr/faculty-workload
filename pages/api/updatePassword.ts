@@ -5,11 +5,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { uid, role } = req.body;
-  console.log(uid, role);
-
+  const { uid, password } = req.body;
   try {
-    await adminAuth.setCustomUserClaims(uid, { role });
+    await adminAuth.updateUser(uid, { password });
     return res.status(200).json({ success: true });
   } catch (error) {
     return res.status(401).json({ success: false });
