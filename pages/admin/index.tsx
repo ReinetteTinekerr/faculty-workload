@@ -7,7 +7,6 @@ import {
   Input,
   Layout,
   message,
-  Modal,
   Row,
   Select,
   Space,
@@ -37,7 +36,6 @@ import RegisterAccount from "components/registerForm";
 import WorkloadLayout from "components/layout/WorkloadLayout";
 import { useAuthSession } from "utils/hooks";
 import {
-  getCampusWorkloads,
   getFacultyWorkloads,
   getUserProfile,
   getUsersByCampusAndRole,
@@ -81,7 +79,8 @@ const Admin: NextPage = () => {
       key: "displayName",
       render: (text: any, record: any) => {
         const [visible, setVisible] = useState(false);
-        const [userProfile, setUserProfile] = useState<any>();
+        const [userProfile, setUserProfile] = useState<any>(null);
+
         return (
           <>
             <a
@@ -233,20 +232,6 @@ const Admin: NextPage = () => {
                   // style={{ width: 120 }}
                   onChange={(newRole) => {
                     setSelectedRole(newRole);
-                    // setTimeout(async () => {
-                    //   const res = await fetch("/api/updateRole", {
-                    //     body: JSON.stringify({ role: newRole, uid: record.uid }),
-                    //     headers: {
-                    //       "Content-Type": "application/json",
-                    //     },
-                    //     method: "POST",
-                    //   });
-                    //   if (res.ok) {
-                    //     message.success(
-                    //       `${record.displayName}'s role was set to ${newRole}`
-                    //     );
-                    //   }
-                    // }, 1000);
                   }}
                 >
                   <Option value="ADMIN">ADMIN</Option>
@@ -429,27 +414,6 @@ const Admin: NextPage = () => {
                 </Form.Item>
               </Space>
             </Drawer>
-            {/* <div style={{ display: "inline-block" }}>
-            <Popconfirm
-              title="Are you sure you want to delete this user permanently?"
-              okText="Yes"
-              cancelText="No"
-              onConfirm={async () => {
-                const res = await fetch("/api/deleteUser", {
-                  body: JSON.stringify({ uid: record.uid }),
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  method: "POST",
-                });
-                if (res.ok) {
-                  message.success(`${record.displayName} has been deleted`);
-                }
-              }}
-            >
-              <Button danger>Delete Account</Button>
-            </Popconfirm>
-          </div> */}
           </>
         );
       },
@@ -505,7 +469,7 @@ const Admin: NextPage = () => {
     firebaseUsers === null ||
     userData === null ||
     !validators ||
-    facultyWorkloads == null
+    facultyWorkloads === null
   ) {
     return <LoadingScreen />;
   }
