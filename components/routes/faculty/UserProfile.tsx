@@ -92,7 +92,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ userData }) => {
             className="site-page-header"
             title={
               <>
-                <Avatar style={{ background: "#f56a00" }} size={"large"}>
+                <Avatar style={{ background: "#87d068" }} size={"large"}>
                   {username[0]}
                 </Avatar>
               </>
