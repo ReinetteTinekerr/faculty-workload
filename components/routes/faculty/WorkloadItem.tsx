@@ -10,7 +10,6 @@ import {
   message,
 } from "antd";
 import Text from "antd/lib/typography/Text";
-import WorkloadHeader from "components/workload/workloadHeader";
 import { graduateColumns, undergraduateColumns } from "data/data";
 
 import styles from "styles/ID.module.css";

@@ -6,7 +6,11 @@ export const undergraduateColumns = [
     title: "SUBJECT / COURCE CODE",
     dataIndex: "courseCode",
     key: "name",
-    render: (text: string) => <div>{text.toUpperCase()}</div>,
+    render: (text: string) => {
+      console.log("again");
+
+      return <div>{text.toUpperCase()}</div>;
+    },
     width: 50,
   },
   {
