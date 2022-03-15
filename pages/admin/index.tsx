@@ -156,10 +156,10 @@ const Admin: NextPage = () => {
               onClick={() => {
                 setSelectedRole(record.role);
                 setSelectedUser({
-                  uid: text.uid,
-                  displayName: text.displayName,
-                  email: text.email,
-                  role: text.role,
+                  uid: record.uid,
+                  displayName: record.displayName,
+                  email: record.email,
+                  role: record.role,
                 });
                 setRoleDrawerVisible(true);
               }}
@@ -456,7 +456,7 @@ const Admin: NextPage = () => {
                       const res = await fetch("/api/updateRole", {
                         body: JSON.stringify({
                           uid: selectedUser?.uid,
-                          role: selectedRole,
+                          role: selectedUser?.role,
                         }),
                         headers: {
                           "Content-Type": "application/json",
@@ -489,7 +489,7 @@ const Admin: NextPage = () => {
                 <Select
                   // disabled={record.customClaims === "ADMIN"}
                   defaultValue={selectedUser?.role}
-                  // style={{ width: 120 }}
+                  style={{ width: 120 }}
                   onChange={(newRole) => {
                     setSelectedRole(newRole);
                   }}
