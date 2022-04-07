@@ -2,7 +2,7 @@ import Image from "next/image";
 import { Col, Dropdown, Layout, Menu, Row, Tabs, Tag } from "antd";
 import Title from "antd/lib/typography/Title";
 import { DownOutlined, LogoutOutlined, UserOutlined } from "@ant-design/icons";
-import { logout } from "../../firebase/firebaseAuthHelper";
+import { logout } from "../../firebase/firebaseAuthService";
 import React, { useContext } from "react";
 import { ActiveComponentContext } from "context/activeComponentContext";
 import { ActiveComponent } from "constants/enums/activeComponent";
@@ -10,6 +10,12 @@ import Link from "next/link";
 import { useAuthSession } from "utils/hooks";
 import { useRouter } from "next/router";
 import { UnsubscribeWorkloadContext } from "context/unsubscribeWorkloadContext";
+import {
+  kAdminRole,
+  kCollegeSecretaryRole,
+  kFacultyRole,
+  kValidatorRole,
+} from "constants/constants";
 const { TabPane } = Tabs;
 const { Header } = Layout;
 
@@ -100,7 +106,7 @@ function WorkloadHeader() {
                 <TabPane
                   style={{ marginLeft: "0px" }}
                   tab={
-                    userRole?.includes("ADMIN") ? (
+                    userRole?.includes(kAdminRole) ? (
                       <Link href={"/admin"}>Admin</Link>
                     ) : (
                       <></>
@@ -111,7 +117,7 @@ function WorkloadHeader() {
                 <TabPane
                   style={{ margin: "0px" }}
                   tab={
-                    userRole?.includes("VALIDATOR") ? (
+                    userRole?.includes(kValidatorRole) ? (
                       <Link href={"/validate-workloads"}>
                         Validate Workloads
                       </Link>
@@ -123,9 +129,9 @@ function WorkloadHeader() {
                 ></TabPane>
                 <TabPane
                   tab={
-                    userRole?.includes("FACULTY") ||
-                    userRole?.includes("VALIDATOR") ||
-                    userRole?.includes("COLLEGE_SECRETARY") ? (
+                    userRole?.includes(kFacultyRole) ||
+                    userRole?.includes(kValidatorRole) ||
+                    userRole?.includes(kCollegeSecretaryRole) ? (
                       <Link href={"/faculty"}>Faculty Workloads</Link>
                     ) : (
                       <></>

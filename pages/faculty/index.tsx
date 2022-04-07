@@ -12,14 +12,9 @@ import {
   getCollegeFacultyMembers,
   getProgramChairmanMembers,
   getWorkloadsBySchoolYear,
-} from "../../firebase/firestoreQueries";
+} from "../../firebase/firestoreService";
 import { getCurrentSchoolYear, openNotification } from "utils/utils";
-import { notification } from "antd";
-// import {
-//   getApprovedUserWorkloads,
-//   getDraftsUserWorkloads,
-//   getUserWorkloadsInProgress,
-// } from "../../firebase/firestoreQueries";
+import { kCollegeSecretaryRole } from "constants/constants";
 
 const Faculty: NextPage = () => {
   const [user, loading, error, userRole, userData] = useAuthSession();
@@ -48,7 +43,7 @@ const Faculty: NextPage = () => {
   }, [userData]);
 
   useEffect(() => {
-    if (!userData || userData.role !== "COLLEGE_SECRETARY") return;
+    if (!userData || userData.role !== kCollegeSecretaryRole) return;
     const unsubscribe = getCollegeFacultyMembers(
       userData.campusId,
       userData.college,

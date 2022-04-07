@@ -1,5 +1,25 @@
-import { Popconfirm } from "antd";
-import { toTitleCase } from "utils/utils";
+export const summaryColumns = [
+  {
+    title: "College",
+    dataIndex: "college",
+    key: "college",
+  },
+  {
+    title: "Name",
+    dataIndex: "name",
+    key: "name",
+  },
+  {
+    title: "Total Workloads",
+    dataIndex: "totalFacultyWorkload",
+    key: "totalFacultyWorkload",
+  },
+  {
+    title: "Excess Workloads",
+    dataIndex: "excessFacultyWorkload",
+    key: "excessFacultyWorkload",
+  },
+];
 
 export const undergraduateColumns = [
   {

@@ -11,8 +11,9 @@ import WorkloadForm from "./workloadForm";
 import {
   getUsersByCampusAndRole,
   uploadWorkloadToFirestore,
-} from "../../firebase/firestoreQueries";
+} from "../../firebase/firestoreService";
 import { getSchoolYear, getValidators } from "utils/utils";
+import { kCollegeSecretaryRole } from "constants/constants";
 
 const formItemLayout = {
   labelCol: {
@@ -47,7 +48,7 @@ export function WorkloadModal({
   const [workloadUser, setWorkloadUser] = useState(null);
   const [workloadUsers, setWorkloadUsers] = useState(null);
   const formInitialValues =
-    userData?.role === "COLLEGE_SECRETARY"
+    userData?.role === kCollegeSecretaryRole
       ? {
           campus: userData?.campus,
           college: userData?.college,
@@ -64,7 +65,7 @@ export function WorkloadModal({
         };
 
   useEffect(() => {
-    if (userData?.role === "COLLEGE_SECRETARY") {
+    if (userData?.role === kCollegeSecretaryRole) {
     }
   }, [workloadUsers]);
 
@@ -95,7 +96,7 @@ export function WorkloadModal({
         });
         console.log(workloads, "loads");
 
-        if (workload.length >= 1 && userData.role !== "COLLEGE_SECRETARY") {
+        if (workload.length >= 1 && userData.role !== kCollegeSecretaryRole) {
           message.error("ERROR: Duplicate workload in a semester");
           throw "Duplicate workload in a semester";
         }
@@ -103,7 +104,7 @@ export function WorkloadModal({
       if (
         workloads &&
         workloads.length >= 3 &&
-        userData.role !== "COLLEGE_SECRETARY"
+        userData.role !== kCollegeSecretaryRole
       ) {
         message.error("ERROR: Maximum of 3 workloads per school year");
         throw "Invalid workload length";
@@ -114,7 +115,7 @@ export function WorkloadModal({
         throw "table is empty";
       }
 
-      if (userData?.role === "COLLEGE_SECRETARY") {
+      if (userData?.role === kCollegeSecretaryRole) {
         const member = facultyMembers?.filter(
           (member: any) => member.username == values.name
         )[0];

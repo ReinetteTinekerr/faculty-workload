@@ -8,6 +8,7 @@ import {
   Badge,
   Collapse,
 } from "antd";
+import { kAdminRole, kValidatorRole } from "constants/constants";
 import { ActiveComponent } from "constants/enums/activeComponent";
 import { ActiveComponentContext } from "context/activeComponentContext";
 import { useContext, useEffect, useState } from "react";
@@ -55,7 +56,7 @@ export function WorkloadList({ workloads, userRole, userPositionIndex }: any) {
       <Collapse
         style={{ width: "90%", margin: "auto" }}
         defaultActiveKey={["First Semester", "Second Semester", "Summer"]}
-        accordion={userRole === "VALIDATOR" ? true : false}
+        accordion={userRole === kValidatorRole ? true : false}
         onChange={(value) => {
           console.log("collapse", value);
           // if (setSelectedSemester) {
@@ -68,75 +69,31 @@ export function WorkloadList({ workloads, userRole, userPositionIndex }: any) {
           return (
             <>
               {value.length > 0 ? (
-                <Panel
-                  header={<Title level={5}>{key}</Title>}
-                  // extra={`Total: ${value.length}`}
-                  key={key}
-                >
-                  <div style={{ overflow: "auto" }}>
-                    <List
-                      bordered
-                      size="small"
-                      itemLayout="horizontal"
-                      dataSource={value}
-                      style={{
-                        paddingLeft: "12px",
-                        paddingRight: "12px",
-                      }}
-                      renderItem={(item: any, index) => (
-                        <RibbonBadge
-                          // validationProgress={item.workload.validationProgress}
-                          isSubmitted={item.submitted}
-                          userRole={userRole}
-                          userPositionIndex={userPositionIndex}
-                          validators={item.validators}
-                          isApproved={item.approved}
-                        >
-                          <List.Item
-                            className={styles.listItem}
-                            onClick={() => {
-                              setSelectedItem(item);
-                              setActiveComponent(ActiveComponent.WorkloadItem);
-                            }}
-                          >
-                            <List.Item.Meta
-                              avatar={
-                                <Avatar style={{ background: "#f56a00" }}>
-                                  {item.workload.name[0]}
-                                </Avatar>
-                              }
-                              title={
-                                <a>
-                                  <span style={{ paddingRight: "15px" }}>
-                                    {item.workload.name},{" "}
-                                    {item.workload.doctorate}
-                                  </span>
-                                  <Tag color={"default"}>
-                                    TOTAL FACULTY WORKLOAD:{" "}
-                                    <Text strong>
-                                      {item.workload.totalFacultyWorkload}
-                                    </Text>
-                                  </Tag>
-                                </a>
-                              }
-                              description={<></>}
-                            />
-                            <List.Item
-                              extra={<WorkloadProgress workload={item} />}
-                            ></List.Item>
-                            <List.Item
-                              extra={
-                                <Text strong>
-                                  {getDate(item.workload.createdAt)}
-                                </Text>
-                              }
-                            ></List.Item>
-                          </List.Item>
-                        </RibbonBadge>
-                      )}
+                <>
+                  {userRole === kValidatorRole || userRole === kAdminRole ? (
+                    <WorkloadListBuilder
+                      userRole={userRole}
+                      userPositionIndex={userPositionIndex}
+                      setActiveComponent={setActiveComponent}
+                      setSelectedItem={setSelectedItem}
+                      value={value}
                     />
-                  </div>
-                </Panel>
+                  ) : (
+                    <Panel
+                      header={<Title level={5}>{key}</Title>}
+                      // extra={`Total: ${value.length}`}
+                      key={key}
+                    >
+                      <WorkloadListBuilder
+                        userRole={userRole}
+                        userPositionIndex={userPositionIndex}
+                        setActiveComponent={setActiveComponent}
+                        setSelectedItem={setSelectedItem}
+                        value={value}
+                      />
+                    </Panel>
+                  )}
+                </>
               ) : (
                 <></>
               )}
@@ -145,6 +102,84 @@ export function WorkloadList({ workloads, userRole, userPositionIndex }: any) {
         })}
       </Collapse>
     </>
+  );
+}
+
+function WorkloadListBuilder({
+  value,
+  userRole,
+  userPositionIndex,
+  setSelectedItem,
+  setActiveComponent,
+}: any) {
+  return (
+    <div
+      style={{
+        overflow: "auto",
+      }}
+    >
+      <List
+        bordered
+        size="small"
+        itemLayout="horizontal"
+        dataSource={value}
+        style={{
+          paddingLeft: "12px",
+          paddingRight: "12px",
+        }}
+        renderItem={(item: any, index) => (
+          <RibbonBadge // validationProgress={item.workload.validationProgress}
+            isSubmitted={item.submitted}
+            userRole={userRole}
+            userPositionIndex={userPositionIndex}
+            validators={item.validators}
+            isApproved={item.approved}
+          >
+            <List.Item
+              className={styles.listItem}
+              onClick={() => {
+                setSelectedItem(item);
+                setActiveComponent(ActiveComponent.WorkloadItem);
+              }}
+            >
+              <List.Item.Meta
+                avatar={
+                  <Avatar
+                    style={{
+                      background: "#f56a00",
+                    }}
+                  >
+                    {item.workload.name[0]}
+                  </Avatar>
+                }
+                title={
+                  <a>
+                    <span
+                      style={{
+                        paddingRight: "15px",
+                      }}
+                    >
+                      {item.workload.name}, {item.workload.doctorate}
+                    </span>
+                    <Tag color={"default"}>
+                      TOTAL FACULTY WORKLOAD:{" "}
+                      <Text strong>{item.workload.totalFacultyWorkload}</Text>
+                    </Tag>
+                  </a>
+                }
+                description={<></>}
+              />
+              <List.Item
+                extra={<WorkloadProgress workload={item} />}
+              ></List.Item>
+              <List.Item
+                extra={<Text strong>{getDate(item.workload.createdAt)}</Text>}
+              ></List.Item>
+            </List.Item>
+          </RibbonBadge>
+        )}
+      />
+    </div>
   );
 }
 
@@ -188,7 +223,7 @@ function RibbonBadge({
     );
   }
 
-  if (totalValidation >= userPositionIndex && userRole === "VALIDATOR") {
+  if (totalValidation >= userPositionIndex && userRole === kValidatorRole) {
     return (
       <Badge.Ribbon
         style={{
@@ -214,7 +249,7 @@ function RibbonBadge({
       </Badge.Ribbon>
     );
   }
-  if (userRole !== "VALIDATOR" && isSubmitted) {
+  if (userRole !== kValidatorRole && isSubmitted) {
     return (
       <Badge.Ribbon
         style={{

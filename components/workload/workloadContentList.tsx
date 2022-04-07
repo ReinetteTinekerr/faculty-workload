@@ -2,9 +2,14 @@ import { Button, Empty, Layout, Tabs } from "antd";
 import { ShowModalProps } from "constants/interface/workloadProps";
 
 import { WorkloadList } from "./WorkloadList";
-import { PlusOutlined, SolutionOutlined } from "@ant-design/icons";
-import { getCurrentSchoolYear, getDecrementedSchoolYear } from "utils/utils";
-import { SchoolYearTabSelection } from "components/schoolYearTabSelection";
+import {
+  OrderedListOutlined,
+  PlusOutlined,
+  SolutionOutlined,
+} from "@ant-design/icons";
+import { SchoolYearTabSelection } from "./schoolYearTabSelection";
+import { SummaryTab } from "./SummaryTab";
+import { toSummaryObject } from "utils/utils";
 
 const { Content } = Layout;
 const { TabPane } = Tabs;
@@ -20,6 +25,8 @@ export function WorkloadContentList({
     background: "#fff",
     overflow: "auto",
   };
+
+  const summary = toSummaryObject(workloads);
   return (
     <Content style={style}>
       <Tabs
@@ -67,6 +74,16 @@ export function WorkloadContentList({
           ) : (
             <WorkloadList workloads={workloads} />
           )}
+        </TabPane>
+        <TabPane
+          tab={
+            <span>
+              <OrderedListOutlined /> Summary
+            </span>
+          }
+          key="2"
+        >
+          <SummaryTab summary={summary} />
         </TabPane>
       </Tabs>
     </Content>

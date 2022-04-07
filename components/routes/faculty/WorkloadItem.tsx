@@ -29,11 +29,16 @@ import { ProgressSider } from "components/workload/workloadSider";
 import {
   deleteWorkload,
   submitWorkload,
-} from "../../../firebase/firestoreQueries";
+} from "../../../firebase/firestoreService";
 import { useAuthSession } from "utils/hooks";
 import LoadingScreen from "components/layout/loadingScreen";
 import WorkloadLayout from "components/layout/WorkloadLayout";
 import { useRouter } from "next/router";
+import {
+  kCollegeSecretaryRole,
+  kFacultyRole,
+  kValidatorRole,
+} from "constants/constants";
 
 const { Content } = Layout;
 
@@ -264,7 +269,16 @@ function NameTitleSignatureField({
                 // display: "inline-block",
               }}
             >
-              <Image width={180} height={60} src={signature} alt="Signature" />
+              {signature ? (
+                <Image
+                  width={180}
+                  height={60}
+                  src={signature}
+                  alt="Signature"
+                />
+              ) : (
+                <></>
+              )}
             </div>
           ) : null}
         </Row>
@@ -866,9 +880,9 @@ function WorkloadItem({ workload, campusId, role, positionIndex }: any) {
                 ) : (
                   <></>
                 )}
-                {role === "FACULTY" ||
-                role === "COLLEGE_SECRETARY" ||
-                (role === "VALIDATOR" && router.pathname === "/faculty") ? (
+                {role === kFacultyRole ||
+                role === kCollegeSecretaryRole ||
+                (role === kValidatorRole && router.pathname === "/faculty") ? (
                   <>
                     {!workload.approved ? (
                       <Popconfirm

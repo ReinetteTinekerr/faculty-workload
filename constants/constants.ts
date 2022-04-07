@@ -22,3 +22,8 @@ export const positionKeyValue = {
   "Director, ARA": 6,
   "University Workload Committee": 7,
 };
+
+export const kValidatorRole = "VALIDATOR";
+export const kAdminRole = "ADMIN";
+export const kFacultyRole = "FACULTY";
+export const kCollegeSecretaryRole = "COLLEGE_SECRETARY";

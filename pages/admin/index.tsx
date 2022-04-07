@@ -1,9 +1,7 @@
 import {
   Button,
-  Collapse,
   Descriptions,
   Drawer,
-  Empty,
   Input,
   Layout,
   message,
@@ -24,6 +22,7 @@ import {
   EyeInvisibleOutlined,
   EyeTwoTone,
   FormOutlined,
+  OrderedListOutlined,
   ScheduleOutlined,
   UserOutlined,
 } from "@ant-design/icons";
@@ -40,21 +39,26 @@ import {
   getUserProfile,
   getUsersByCampusAndRole,
   updateUserProfile,
-} from "../../firebase/firestoreQueries";
-import { WorkloadList } from "components/workload/WorkloadList";
+} from "../../firebase/firestoreService";
 import WorkloadItem from "components/routes/faculty/WorkloadItem";
 import {
   getCurrentSchoolYear,
   getCurrentSemester,
   groupByKey,
+  toSummaryObject,
 } from "utils/utils";
-import { SchoolYearTabSelection } from "components/schoolYearTabSelection";
-import { positionKeyValue } from "constants/constants";
-import { SemesterTabSelection } from "components/semesterTabSelection";
+import {
+  kAdminRole,
+  kCollegeSecretaryRole,
+  kFacultyRole,
+  kValidatorRole,
+  positionKeyValue,
+} from "constants/constants";
+import { SummaryTab } from "components/workload/SummaryTab";
+import { WorkloadsTab } from "components/workload/WorkloadsTab";
 
 const { TabPane } = Tabs;
-const { Panel } = Collapse;
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Content } = Layout;
 const { Option } = Select;
 
@@ -66,11 +70,14 @@ interface User {
 }
 
 const Admin: NextPage = () => {
+  // Firebase vars
   const [user, loading, error, userRole, userData] = useAuthSession();
   const { activeComponent, selectedItem } = useContext(ActiveComponentContext)!;
   const [firebaseUsers, setFirebaseUsers] = useState<any>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   // const [campusWorkloads, setCampusWorkloads] = useState<any>(null);
+
+  // Workloads vars
   const [validators, setValidators] = useState<any>(null);
   const [tabKey, setTabKey] = useState("1");
   const [facultyWorkloads, setFacultyWorkloads] = useState<any>(null);
@@ -80,6 +87,7 @@ const Admin: NextPage = () => {
     getCurrentSemester()
   );
 
+  // Modal vars
   const [visible, setVisible] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
 
@@ -97,8 +105,8 @@ const Admin: NextPage = () => {
       }
     });
 
-    if (positionIndex !== -1 && selectedRole === "VALIDATOR") return false;
-    if (selectedRole !== "VALIDATOR") return false;
+    if (positionIndex !== -1 && selectedRole === kValidatorRole) return false;
+    if (selectedRole !== kValidatorRole) return false;
     return true;
   };
 
@@ -212,27 +220,23 @@ const Admin: NextPage = () => {
     },
   ];
 
+  // Initialize
   useEffect(() => {
     const storedSchoolYear = localStorage.getItem("schoolYear");
     const storedCollege = localStorage.getItem("college");
-    // const storedSemester = localStorage.getItem("semester");
     setSelectedSchoolYear(
       !storedSchoolYear ? getCurrentSchoolYear() : storedSchoolYear
     );
     setSelectedCollege(!storedCollege ? "" : storedCollege);
-    // setSelectedSemester(!storedSemester ? "" : storedSemester);
   }, []);
 
+  // Manager user accounts
   useEffect(() => {
     if (!user) return;
     getUsers().then((users) => setFirebaseUsers(users));
   }, [user]);
 
-  // useEffect(() => {
-  //   if (!userData || !user) return;
-  //   getCampusWorkloads(userData.campusId, setCampusWorkloads).then(() => {});
-  // }, [user, userData]);
-
+  // Workloads
   useEffect(() => {
     if (!userData || !user) return;
     const unsubscribe = getFacultyWorkloads(
@@ -246,9 +250,10 @@ const Admin: NextPage = () => {
     };
   }, [userData, user, selectedSchoolYear, selectedSemester]);
 
+  // Validators
   useEffect(() => {
     if (!userData) return;
-    getUsersByCampusAndRole(userData.campusId, "VALIDATOR").then((docs) => {
+    getUsersByCampusAndRole(userData.campusId, kValidatorRole).then((docs) => {
       setValidators(() =>
         docs.sort((a: any, b: any) => a.positionIndex - b.positionIndex)
       );
@@ -280,6 +285,7 @@ const Admin: NextPage = () => {
     );
   }
   const groupByCollegeWorkloads = groupByKey(facultyWorkloads);
+  const summary = toSummaryObject(facultyWorkloads);
   return (
     <>
       <WorkloadLayout headerTitle="Dashboard | Admin">
@@ -289,20 +295,6 @@ const Admin: NextPage = () => {
               defaultActiveKey={tabKey}
               onChange={(key) => setTabKey(key)}
               centered
-              tabBarExtraContent={{
-                right: (
-                  <>
-                    <SchoolYearTabSelection
-                      selectedSchoolYear={selectedSchoolYear}
-                      setSelectedSchoolYear={setSelectedSchoolYear}
-                    />
-                    <SemesterTabSelection
-                      selectedSemester={selectedSemester}
-                      setSelectedSemester={setSelectedSemester}
-                    />
-                  </>
-                ),
-              }}
             >
               <TabPane
                 tab={
@@ -339,51 +331,35 @@ const Admin: NextPage = () => {
                 }
                 key="3"
               >
-                {Object.keys(groupByCollegeWorkloads).length > 0 ? (
-                  <Collapse
-                    style={{ width: "90%", margin: "auto" }}
-                    defaultActiveKey={[selectedCollege]}
-                    accordion
-                    onChange={(value) => {
-                      console.log("collapse", value);
-                      setSelectedCollege(value ? value.toString() : "");
-                      localStorage.setItem(
-                        "college",
-                        value ? value.toString() : ""
-                      );
-                    }}
-                  >
-                    {Object.entries(groupByCollegeWorkloads).map(
-                      ([key, value]) => {
-                        return (
-                          <Panel
-                            header={<Title level={5}>{key}</Title>}
-                            extra={`Total: ${value.length}`}
-                            key={key}
-                          >
-                            <WorkloadList
-                              userRole={userRole}
-                              userPositionIndex={userData.positionIndex}
-                              workloads={value}
-                              selectedSemester={selectedSemester}
-                              setSelectedSemester={setSelectedSemester}
-                            />
-                          </Panel>
-                        );
-                      }
-                    )}
-                  </Collapse>
-                ) : (
-                  <Empty></Empty>
-                )}
+                <WorkloadsTab
+                  groupByCollegeWorkloads={groupByCollegeWorkloads}
+                  selectedCollege={selectedCollege}
+                  setSelectedCollege={setSelectedCollege}
+                  selectedSchoolYear={selectedSchoolYear}
+                  setSelectedSchoolYear={setSelectedSchoolYear}
+                  selectedSemester={selectedSemester}
+                  setSelectedSemester={setSelectedSemester}
+                  userData={userData}
+                  userRole={userRole}
+                />
               </TabPane>
               <TabPane
                 tab={
                   <span>
-                    <ApartmentOutlined /> Workload Validation Flow
+                    <OrderedListOutlined /> Summary
                   </span>
                 }
                 key="4"
+              >
+                <SummaryTab summary={summary} />
+              </TabPane>
+              <TabPane
+                tab={
+                  <span>
+                    <ApartmentOutlined /> Validators
+                  </span>
+                }
+                key="5"
               >
                 <Row justify="center">
                   <Timeline>
@@ -400,262 +376,337 @@ const Admin: NextPage = () => {
                 </Row>
               </TabPane>
             </Tabs>
-            <Drawer
-              // title="Profile"
-              placement="right"
-              onClose={() => setVisible(false)}
+            <UserProfileDrawer
               visible={visible}
-            >
-              {/* {JSON.stringify(userProfile)} */}
-              <Descriptions title="User Info" column={1}>
-                <Descriptions.Item label="Username">
-                  {userProfile?.username}
-                </Descriptions.Item>
-                <Descriptions.Item label="Role">
-                  <Tag color={"green"}>{userProfile?.role}</Tag>
-                </Descriptions.Item>
-                <Descriptions.Item label="Position">
-                  {userProfile?.position}
-                </Descriptions.Item>
-                <Descriptions.Item label="Email">
-                  {userProfile?.email}
-                </Descriptions.Item>
-                <Descriptions.Item label="Baccalaureate">
-                  {userProfile?.baccalaureate}
-                </Descriptions.Item>
-                <Descriptions.Item label="Masteral">
-                  {userProfile?.masteral}
-                </Descriptions.Item>
-                <Descriptions.Item label="Doctorate">
-                  {userProfile?.doctorate}
-                </Descriptions.Item>
-                <Descriptions.Item label="College">
-                  {userProfile?.college}
-                </Descriptions.Item>
-                <Descriptions.Item label="Campus">
-                  {userProfile?.campus}
-                </Descriptions.Item>
-              </Descriptions>
-            </Drawer>
+              setVisible={setVisible}
+              userProfile={userProfile}
+            />
 
-            <Drawer
-              title="Update Role"
-              // width={}
-              onClose={() => setRoleDrawerVisible(false)}
-              visible={roleDrawerVisible}
-              bodyStyle={{ paddingBottom: 80 }}
-              extra={
-                <Space>
-                  <Button onClick={() => setRoleDrawerVisible(false)}>
-                    Cancel
-                  </Button>
-                  <Button
-                    disabled={isInvalidPosition()}
-                    onClick={async () => {
-                      setRoleDrawerVisible(false);
-                      const res = await fetch("/api/updateRole", {
-                        body: JSON.stringify({
-                          uid: selectedUser?.uid,
-                          role: selectedUser?.role,
-                        }),
-                        headers: {
-                          "Content-Type": "application/json",
-                        },
-                        method: "POST",
-                      });
-                      console.log(res);
+            <UpdateRoleDrawer
+              selectedUser={selectedUser}
+              roleDrawerVisible={roleDrawerVisible}
+              setRoleDrawerVisible={setRoleDrawerVisible}
+              selectedRole={selectedRole}
+              setSelectedRole={setSelectedRole}
+              selectedPosition={selectedPosition}
+              setSelectedPosition={setSelectedPosition}
+              positionIndex={positionIndex}
+              isInvalidPosition={isInvalidPosition}
+            />
 
-                      if (res.ok) {
-                        await updateUserProfile(selectedUser!.uid, {
-                          position: selectedPosition,
-                          positionIndex,
-                          role: selectedRole,
-                        });
-                        message.success(
-                          `${selectedUser?.displayName} role has been updated`
-                        );
-                      }
-                    }}
-                    type="primary"
-                  >
-                    Update
-                  </Button>
-                </Space>
-              }
-            >
-              <Space direction="vertical">
-                <Text>Display name: {selectedUser?.displayName}</Text>
-                <Text>Current email: {selectedUser?.email}</Text>
-                <Select
-                  // disabled={record.customClaims === "ADMIN"}
-                  defaultValue={selectedUser?.role}
-                  style={{ width: 120 }}
-                  onChange={(newRole) => {
-                    setSelectedRole(newRole);
-                  }}
-                >
-                  <Option value="ADMIN">ADMIN</Option>
-                  <Option value="FACULTY">FACULTY</Option>
-                  <Option value="VALIDATOR">VALIDATOR</Option>
-                  <Option value="COLLEGE_SECRETARY">COLLEGE SECRETARY</Option>
-                </Select>
-                {selectedRole === "VALIDATOR" ? (
-                  <AutoComplete
-                    filterOption={true}
-                    style={{ width: 200 }}
-                    onSelect={(value) => {
-                      console.log(value, "value");
-                    }}
-                    onChange={(value) => {
-                      setSelectedPosition(value);
-                    }}
-                    dataSource={[
-                      "Program Chairman, BSCS",
-                      "Dean",
-                      "Executive Officer, ISUCC",
-                      "Campus Registrar",
-                      "President, ISUCCFA",
-                      "Director, ARA",
-                      "University Workload Committee",
-                    ]}
-                    placeholder="Position"
-                  />
-                ) : (
-                  <></>
-                )}
-              </Space>
-            </Drawer>
-
-            <Drawer
-              title="Update Email"
-              // width={}
-              onClose={() => setEmailModalVisible(false)}
-              visible={emailModalVisible}
-              bodyStyle={{ paddingBottom: 80 }}
-              extra={
-                <Space>
-                  <Button onClick={() => setEmailModalVisible(false)}>
-                    Cancel
-                  </Button>
-                  <Button
-                    disabled={!validEmail.test(newEmail)}
-                    onClick={async () => {
-                      setEmailModalVisible(false);
-                      const res = await fetch("/api/updateEmail", {
-                        body: JSON.stringify({
-                          email: newEmail,
-                          uid: selectedUser?.uid,
-                        }),
-                        headers: {
-                          "Content-Type": "application/json",
-                        },
-                        method: "POST",
-                      });
-                      if (res.ok) {
-                        message.success(
-                          `${selectedUser?.displayName} email has been updated`
-                        );
-                      }
-                    }}
-                    type="primary"
-                  >
-                    Update
-                  </Button>
-                </Space>
-              }
-            >
-              <Space direction="vertical">
-                <Text>Display name: {selectedUser?.displayName}</Text>
-                <Text>Current email: {selectedUser?.email}</Text>
-                <Form.Item label="New email">
-                  <Input
-                    placeholder="isu_user@gmail.com"
-                    onChange={(value) => {
-                      setnewEmail(value.currentTarget.value);
-                    }}
-                  />
-                </Form.Item>
-              </Space>
-            </Drawer>
-            <Drawer
-              title="Update Password"
-              // width={}
-              onClose={() => setPasswordModalVisible(false)}
-              visible={passwordModalVisible}
-              bodyStyle={{ paddingBottom: 80 }}
-              extra={
-                <Space>
-                  <Button onClick={() => setPasswordModalVisible(false)}>
-                    Cancel
-                  </Button>
-                  <Button
-                    disabled={
-                      password.length >= 6 && password === confirmPassword
-                        ? false
-                        : true
-                    }
-                    onClick={async () => {
-                      setPasswordModalVisible(false);
-                      const res = await fetch("/api/updatePassword", {
-                        body: JSON.stringify({
-                          password,
-                          uid: selectedUser?.uid,
-                        }),
-                        headers: {
-                          "Content-Type": "application/json",
-                        },
-                        method: "POST",
-                      });
-                      if (res.ok) {
-                        message.success(
-                          `${selectedUser?.displayName} password has been updated`
-                        );
-                      }
-                    }}
-                    type="primary"
-                  >
-                    Update
-                  </Button>
-                </Space>
-              }
-            >
-              <Space direction="vertical">
-                <Text>Display name: {selectedUser?.displayName}</Text>
-                <Text>Email: {selectedUser?.email}</Text>
-                <Form.Item label="Password">
-                  <Input.Password
-                    placeholder="input password"
-                    onChange={(value) => {
-                      console.log(value.currentTarget.value);
-                      setPassword(value.currentTarget.value);
-                    }}
-                  />
-                </Form.Item>
-                <Form.Item
-                  label="Confirm"
-                  validateStatus={
-                    password === confirmPassword ? "success" : "error"
-                  }
-                >
-                  <Input.Password
-                    placeholder="input password"
-                    onChange={(value) => {
-                      console.log(value.currentTarget.value);
-                      setConfirmPassword(value.currentTarget.value);
-                    }}
-                    iconRender={(visible) =>
-                      visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
-                    }
-                  />
-                </Form.Item>
-              </Space>
-            </Drawer>
+            <UpdateEmailDrawer
+              selectedUser={selectedUser}
+              emailModalVisible={emailModalVisible}
+              setEmailModalVisible={setEmailModalVisible}
+              newEmail={newEmail}
+              setnewEmail={setnewEmail}
+              validEmail={validEmail}
+            />
+            <UpdatePasswordDrawer
+              setPasswordModalVisible={setPasswordModalVisible}
+              passwordModalVisible={passwordModalVisible}
+              password={password}
+              confirmPassword={confirmPassword}
+              selectedUser={selectedUser}
+              setPassword={setPassword}
+              setConfirmPassword={setConfirmPassword}
+            />
           </Content>
         </Layout>
       </WorkloadLayout>
     </>
   );
 };
+
+function UpdatePasswordDrawer({
+  setPasswordModalVisible,
+  passwordModalVisible,
+  password,
+  confirmPassword,
+  selectedUser,
+  setPassword,
+  setConfirmPassword,
+}: any) {
+  return (
+    <Drawer
+      title="Update Password"
+      // width={}
+      onClose={() => setPasswordModalVisible(false)}
+      visible={passwordModalVisible}
+      bodyStyle={{ paddingBottom: 80 }}
+      extra={
+        <Space>
+          <Button onClick={() => setPasswordModalVisible(false)}>Cancel</Button>
+          <Button
+            disabled={
+              password.length >= 6 && password === confirmPassword
+                ? false
+                : true
+            }
+            onClick={async () => {
+              setPasswordModalVisible(false);
+              const res = await fetch("/api/updatePassword", {
+                body: JSON.stringify({
+                  password,
+                  uid: selectedUser?.uid,
+                }),
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                method: "POST",
+              });
+              if (res.ok) {
+                message.success(
+                  `${selectedUser?.displayName} password has been updated`
+                );
+              }
+            }}
+            type="primary"
+          >
+            Update
+          </Button>
+        </Space>
+      }
+    >
+      <Space direction="vertical">
+        <Text>Display name: {selectedUser?.displayName}</Text>
+        <Text>Email: {selectedUser?.email}</Text>
+        <Form.Item label="Password">
+          <Input.Password
+            placeholder="input password"
+            onChange={(value) => {
+              console.log(value.currentTarget.value);
+              setPassword(value.currentTarget.value);
+            }}
+          />
+        </Form.Item>
+        <Form.Item
+          label="Confirm"
+          validateStatus={password === confirmPassword ? "success" : "error"}
+        >
+          <Input.Password
+            placeholder="input password"
+            onChange={(value) => {
+              console.log(value.currentTarget.value);
+              setConfirmPassword(value.currentTarget.value);
+            }}
+            iconRender={(visible) =>
+              visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+            }
+          />
+        </Form.Item>
+      </Space>
+    </Drawer>
+  );
+}
+
+function UserProfileDrawer({ userProfile, setVisible, visible }: any) {
+  return (
+    <Drawer // title="Profile"
+      placement="right"
+      onClose={() => setVisible(false)}
+      visible={visible}
+    >
+      {/* {JSON.stringify(userProfile)} */}
+      <Descriptions title="User Info" column={1}>
+        <Descriptions.Item label="Username">
+          {userProfile?.username}
+        </Descriptions.Item>
+        <Descriptions.Item label="Role">
+          <Tag color={"green"}>{userProfile?.role}</Tag>
+        </Descriptions.Item>
+        <Descriptions.Item label="Position">
+          {userProfile?.position}
+        </Descriptions.Item>
+        <Descriptions.Item label="Email">
+          {userProfile?.email}
+        </Descriptions.Item>
+        <Descriptions.Item label="Baccalaureate">
+          {userProfile?.baccalaureate}
+        </Descriptions.Item>
+        <Descriptions.Item label="Masteral">
+          {userProfile?.masteral}
+        </Descriptions.Item>
+        <Descriptions.Item label="Doctorate">
+          {userProfile?.doctorate}
+        </Descriptions.Item>
+        <Descriptions.Item label="College">
+          {userProfile?.college}
+        </Descriptions.Item>
+        <Descriptions.Item label="Campus">
+          {userProfile?.campus}
+        </Descriptions.Item>
+      </Descriptions>
+    </Drawer>
+  );
+}
+
+function UpdateRoleDrawer({
+  selectedRole,
+  setSelectedRole,
+  roleDrawerVisible,
+  setRoleDrawerVisible,
+  selectedUser,
+  selectedPosition,
+  setSelectedPosition,
+  positionIndex,
+  isInvalidPosition,
+}: any) {
+  return (
+    <Drawer
+      title="Update Role" // width={}
+      onClose={() => setRoleDrawerVisible(false)}
+      visible={roleDrawerVisible}
+      bodyStyle={{
+        paddingBottom: 80,
+      }}
+      extra={
+        <Space>
+          <Button onClick={() => setRoleDrawerVisible(false)}>Cancel</Button>
+          <Button
+            disabled={isInvalidPosition()}
+            onClick={async () => {
+              setRoleDrawerVisible(false);
+              const res = await fetch("/api/updateRole", {
+                body: JSON.stringify({
+                  uid: selectedUser?.uid,
+                  role: selectedUser?.role,
+                }),
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                method: "POST",
+              });
+              console.log(res);
+
+              if (res.ok) {
+                await updateUserProfile(selectedUser.uid, {
+                  position: selectedPosition,
+                  positionIndex: positionIndex,
+                  role: selectedRole,
+                });
+                message.success(
+                  `${selectedUser?.displayName} role has been updated`
+                );
+              }
+            }}
+            type="primary"
+          >
+            Update
+          </Button>
+        </Space>
+      }
+    >
+      <Space direction="vertical">
+        <Text>Display name: {selectedUser?.displayName}</Text>
+        <Text>Current email: {selectedUser?.email}</Text>
+        <Select // disabled={record.customClaims === "ADMIN"}
+          defaultValue={selectedUser?.role}
+          style={{
+            width: 120,
+          }}
+          onChange={(newRole) => {
+            setSelectedRole(newRole);
+          }}
+        >
+          <Option value={kAdminRole}>ADMIN</Option>
+          <Option value={kFacultyRole}>FACULTY</Option>
+          <Option value={kValidatorRole}>VALIDATOR</Option>
+          <Option value={kCollegeSecretaryRole}>COLLEGE SECRETARY</Option>
+        </Select>
+        {selectedRole === kValidatorRole ? (
+          <AutoComplete
+            filterOption={true}
+            style={{
+              width: 200,
+            }}
+            onSelect={(value) => {
+              console.log(value, "value");
+            }}
+            onChange={(value) => {
+              setSelectedPosition(value);
+            }}
+            dataSource={[
+              "Program Chairman, BSCS",
+              "Dean",
+              "Executive Officer, ISUCC",
+              "Campus Registrar",
+              "President, ISUCCFA",
+              "Director, ARA",
+              "University Workload Committee",
+            ]}
+            placeholder="Position"
+          />
+        ) : (
+          <></>
+        )}
+      </Space>
+    </Drawer>
+  );
+}
+
+function UpdateEmailDrawer({
+  emailModalVisible,
+  setEmailModalVisible,
+  validEmail,
+  newEmail,
+  setnewEmail,
+  selectedUser,
+}: any) {
+  return (
+    <Drawer
+      title="Update Email" // width={}
+      onClose={() => setEmailModalVisible(false)}
+      visible={emailModalVisible}
+      bodyStyle={{
+        paddingBottom: 80,
+      }}
+      extra={
+        <Space>
+          <Button onClick={() => setEmailModalVisible(false)}>Cancel</Button>
+          <Button
+            disabled={!validEmail.test(newEmail)}
+            onClick={async () => {
+              setEmailModalVisible(false);
+              const res = await fetch("/api/updateEmail", {
+                body: JSON.stringify({
+                  email: newEmail,
+                  uid: selectedUser?.uid,
+                }),
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                method: "POST",
+              });
+
+              if (res.ok) {
+                message.success(
+                  `${selectedUser?.displayName} email has been updated`
+                );
+              }
+            }}
+            type="primary"
+          >
+            Update
+          </Button>
+        </Space>
+      }
+    >
+      <Space direction="vertical">
+        <Text>Display name: {selectedUser?.displayName}</Text>
+        <Text>Current email: {selectedUser?.email}</Text>
+        <Form.Item label="New email">
+          <Input
+            placeholder="isu_user@gmail.com"
+            onChange={(value) => {
+              setnewEmail(value.currentTarget.value);
+            }}
+          />
+        </Form.Item>
+      </Space>
+    </Drawer>
+  );
+}
 
 async function getUsers() {
   const res = await fetch("/api/getUsers");

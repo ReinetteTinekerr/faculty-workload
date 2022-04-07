@@ -1,3 +1,4 @@
+import { kFacultyRole, kValidatorRole } from "constants/constants";
 import {
   collection,
   deleteDoc,
@@ -39,7 +40,7 @@ export function getWorkloadsBySchoolYear(
   schoolYear: string
 ) {
   const q =
-    role == "FACULTY" || role == "VALIDATOR"
+    role == kFacultyRole || role == kValidatorRole
       ? query(
           collection(db, "workloads", campusId, "workloads"),
           where("createdBy", "==", userId),
@@ -77,7 +78,7 @@ export function getUserWorkloadsInProgress(
   college: string
 ) {
   const q =
-    role === "FACULTY"
+    role === kFacultyRole
       ? query(
           collection(db, "workloads", campusId, "workloads"),
           where("createdBy", "==", userId),

@@ -8,7 +8,13 @@ import {
   message,
   AutoComplete,
 } from "antd";
-import { positionKeyValue } from "constants/constants";
+import {
+  kAdminRole,
+  kCollegeSecretaryRole,
+  kFacultyRole,
+  kValidatorRole,
+  positionKeyValue,
+} from "constants/constants";
 import { useState } from "react";
 
 const { Option } = Select;
@@ -37,8 +43,9 @@ const isInvalidPosition = (selectedPosition: string, selectedRole: string) => {
     }
   });
 
-  if (positionIndex !== -1 && selectedRole === "VALIDATOR") return false;
-  if (selectedRole !== "VALIDATOR" && selectedRole !== "ADMIN") return false;
+  if (positionIndex !== -1 && selectedRole === kValidatorRole) return false;
+  if (selectedRole !== kValidatorRole && selectedRole !== kAdminRole)
+    return false;
   return true;
 };
 
@@ -466,12 +473,12 @@ export default function RegisterAccount() {
               <Select
                 // allowClear
                 onDeselect={(role) => {
-                  if (role === "VALIDATOR") {
+                  if (role === kValidatorRole) {
                     setIsItemSelected(false);
                   }
                 }}
                 onSelect={(role: any) => {
-                  if (role === "VALIDATOR") {
+                  if (role === kValidatorRole) {
                     setIsItemSelected(true);
                   } else {
                     setIsItemSelected(false);
@@ -498,10 +505,10 @@ export default function RegisterAccount() {
                     .localeCompare(optionB.children.toLowerCase())
                 }
               >
-                <Option value="FACULTY">FACULTY</Option>
-                <Option value="VALIDATOR">WORKLOAD VALIDATOR</Option>
-                <Option value="ADMIN">ADMIN</Option>
-                <Option value="COLLEGE_SECRETARY">COLLEGE SECRETARY</Option>
+                <Option value={kFacultyRole}>FACULTY</Option>
+                <Option value={kValidatorRole}>WORKLOAD VALIDATOR</Option>
+                <Option value={kAdminRole}>ADMIN</Option>
+                <Option value={kCollegeSecretaryRole}>COLLEGE SECRETARY</Option>
               </Select>
             </Form.Item>
           </Col>
@@ -535,10 +542,17 @@ export default function RegisterAccount() {
             </Form.Item>
           </Col>
         </Row>
-        <Row justify="end">
+        <Row justify="center">
           <Form.Item>
-            <Button type="primary" htmlType="submit" disabled={loading}>
-              REGISTER
+            <Button
+              // style={{ padding: "5px", height: "40px" }}
+              size="middle"
+              type="primary"
+              shape="round"
+              htmlType="submit"
+              disabled={loading}
+            >
+              Create
             </Button>
           </Form.Item>
         </Row>
