@@ -160,6 +160,16 @@ export function groupByKey(array: [any]): { string: [any] } {
   }, {});
 }
 
+export function toSummaryObject(array: [any]) {
+  return array
+    .map((workload) => {
+      const { college, name, totalFacultyWorkload, excessFacultyWorkload } =
+        workload.workload;
+      return { college, name, totalFacultyWorkload, excessFacultyWorkload };
+    })
+    .sort((a: any, b: any) => a.college - b.college);
+}
+
 export const openNotification = (title: string, description: string) => {
   notification.warning({
     key: "signature",

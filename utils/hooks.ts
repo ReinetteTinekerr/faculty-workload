@@ -2,7 +2,13 @@ import { auth } from "../firebase/clientApp";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { getUserProfileFromCacheElseServer } from "../firebase/firestoreQueries";
+import { getUserProfileFromCacheElseServer } from "../firebase/firestoreService";
+import {
+  kAdminRole,
+  kCollegeSecretaryRole,
+  kFacultyRole,
+  kValidatorRole,
+} from "constants/constants";
 
 // const converter = {
 //   toFirestore: (data: UserProfileProps) => data,
@@ -32,30 +38,30 @@ export function useAuthSession() {
 
         if (
           currentRoute === "/faculty" &&
-          !["FACULTY", "VALIDATOR", "COLLEGE_SECRETARY"].includes(role)
+          ![kFacultyRole, kValidatorRole, kCollegeSecretaryRole].includes(role)
         ) {
           router.push("/404");
-        } else if (currentRoute === "/admin" && role !== "ADMIN") {
+        } else if (currentRoute === "/admin" && role !== kAdminRole) {
           router.push("/404");
         } else if (
           currentRoute === "/validate-workloads" &&
-          role !== "VALIDATOR"
+          role !== kValidatorRole
         ) {
           router.push("/404");
         } else if (
           (currentRoute === "/login" || currentRoute === "/") &&
-          role === "ADMIN"
+          role === kAdminRole
         ) {
           router.replace("/admin");
         } else if (
           (currentRoute === "/login" || currentRoute === "/") &&
-          role === "VALIDATOR"
+          role === kValidatorRole
         ) {
           router.replace("/validate-workloads");
         } else if (
           ((currentRoute === "/login" || currentRoute === "/") &&
-            role === "FACULTY") ||
-          role === "COLLEGE_SECRETARY"
+            role === kFacultyRole) ||
+          role === kCollegeSecretaryRole
         ) {
           router.replace("/faculty");
         }

@@ -5,39 +5,38 @@ import UserProfile from "components/routes/faculty/UserProfile";
 import { ActiveComponent } from "constants/enums/activeComponent";
 import { ActiveComponentContext } from "context/activeComponentContext";
 import type { NextPage } from "next";
-import { useContext, useEffect, useState } from "react";
+import { Component, useContext, useEffect, useRef, useState } from "react";
 import { useAuthSession } from "utils/hooks";
-import { Tabs, Collapse, Typography, Empty } from "antd";
-import {
-  AuditOutlined,
-  FormOutlined,
-  SolutionOutlined,
-} from "@ant-design/icons";
+import { Tabs, Collapse, Typography, Empty, Table, Button, Row } from "antd";
+import { SolutionOutlined, OrderedListOutlined } from "@ant-design/icons";
 import WorkloadItem from "components/routes/faculty/WorkloadItem";
+import styles from "styles/ID.module.css";
 
 import { WorkloadList } from "components/workload/WorkloadList";
 import {
   getFacultyWorkloads,
   getProgramChairs,
-  getValidatedWorkloads,
-} from "../../firebase/firestoreQueries";
+} from "../../firebase/firestoreService";
 import Head from "next/head";
 import {
   getCurrentSchoolYear,
   getCurrentSemester,
   groupByKey,
   openNotification,
+  toSummaryObject,
 } from "utils/utils";
-import { SchoolYearTabSelection } from "components/schoolYearTabSelection";
-import { SemesterTabSelection } from "components/semesterTabSelection";
+import { summaryColumns } from "data/data";
+import ReactToPrint from "react-to-print";
+import { DropdownSchoolYearAndSemester } from "components/workload/schoolYearAndSemesterDropdown";
+import { SummaryTab } from "components/workload/SummaryTab";
+import { WorkloadsTab } from "components/workload/WorkloadsTab";
 const { TabPane } = Tabs;
 const { Panel } = Collapse;
 const { Title } = Typography;
 
 const ValidateWorkloads: NextPage = () => {
   const [user, loading, error, userRole, userData] = useAuthSession();
-  const [facultyWorkloads, setFacultyWorkloads] = useState<any>(null);
-  const [validatedWorkloads, setValidatedWorkloads] = useState<any>(null);
+  const [facultyWorkloads, setFacultyWorkloads] = useState<[any] | null>(null);
   const { activeComponent, setActiveComponent, setSelectedItem, selectedItem } =
     useContext(ActiveComponentContext)!;
   const [selectedSchoolYear, setSelectedSchoolYear] = useState<string>("");
@@ -46,17 +45,17 @@ const ValidateWorkloads: NextPage = () => {
     getCurrentSemester()
   );
 
+  // Initialize
   useEffect(() => {
     const storedSchoolYear = localStorage.getItem("schoolYear");
     const storedCollege = localStorage.getItem("college");
-    // const storedSemester = localStorage.getItem("semester");
     setSelectedSchoolYear(
       !storedSchoolYear ? getCurrentSchoolYear() : storedSchoolYear
     );
     setSelectedCollege(!storedCollege ? "" : storedCollege);
-    // setSelectedSemester(!storedSemester ? "" : storedSemester);
   }, []);
 
+  // Get Workloads
   useEffect(() => {
     if (!userData || !user) return;
     if (userData.position.toLowerCase().includes("program chairman")) return;
@@ -73,6 +72,7 @@ const ValidateWorkloads: NextPage = () => {
     };
   }, [userData, selectedSchoolYear, selectedSemester]);
 
+  // Get ProgramChairs
   useEffect(() => {
     if (!userData || !user) return;
     if (!userData.position.toLowerCase().includes("program chairman")) return;
@@ -93,9 +93,8 @@ const ValidateWorkloads: NextPage = () => {
     return <LoadingScreen />;
   }
 
-  console.log(loading, facultyWorkloads, user);
-
   const groupByCollegeWorkloads = groupByKey(facultyWorkloads);
+  const summary = toSummaryObject(facultyWorkloads);
 
   if (activeComponent === ActiveComponent.Profile) {
     return <UserProfile userData={userData} />;
@@ -133,25 +132,7 @@ const ValidateWorkloads: NextPage = () => {
           <Content
             style={{ margin: "0px 10px", background: "#fff", overflow: "auto" }}
           >
-            <Tabs
-              defaultActiveKey="1"
-              onChange={() => {}}
-              centered
-              tabBarExtraContent={{
-                right: (
-                  <>
-                    <SchoolYearTabSelection
-                      selectedSchoolYear={selectedSchoolYear}
-                      setSelectedSchoolYear={setSelectedSchoolYear}
-                    />
-                    <SemesterTabSelection
-                      selectedSemester={selectedSemester}
-                      setSelectedSemester={setSelectedSemester}
-                    />
-                  </>
-                ),
-              }}
-            >
+            <Tabs defaultActiveKey="1" onChange={() => {}} centered>
               <TabPane
                 tab={
                   <span>
@@ -160,43 +141,27 @@ const ValidateWorkloads: NextPage = () => {
                 }
                 key="1"
               >
-                {Object.keys(groupByCollegeWorkloads).length > 0 ? (
-                  <Collapse
-                    style={{ width: "90%", margin: "auto" }}
-                    defaultActiveKey={[selectedCollege]}
-                    accordion
-                    onChange={(value) => {
-                      console.log("collapse", value);
-                      setSelectedCollege(value ? value.toString() : "");
-                      localStorage.setItem(
-                        "college",
-                        value ? value.toString() : ""
-                      );
-                    }}
-                  >
-                    {Object.entries(groupByCollegeWorkloads).map(
-                      ([key, value]) => {
-                        return (
-                          <Panel
-                            header={<Title level={5}>{key}</Title>}
-                            extra={`Total: ${value.length}`}
-                            key={key}
-                          >
-                            <WorkloadList
-                              userRole={userRole}
-                              userPositionIndex={userData.positionIndex}
-                              workloads={value}
-                              selectedSemester={selectedSemester}
-                              setSelectedSemester={setSelectedSemester}
-                            />
-                          </Panel>
-                        );
-                      }
-                    )}
-                  </Collapse>
-                ) : (
-                  <Empty></Empty>
-                )}
+                <WorkloadsTab
+                  groupByCollegeWorkloads={groupByCollegeWorkloads}
+                  selectedCollege={selectedCollege}
+                  setSelectedCollege={setSelectedCollege}
+                  selectedSchoolYear={selectedSchoolYear}
+                  setSelectedSchoolYear={setSelectedSchoolYear}
+                  selectedSemester={selectedSemester}
+                  setSelectedSemester={setSelectedSemester}
+                  userData={userData}
+                  userRole={userRole}
+                />
+              </TabPane>
+              <TabPane
+                tab={
+                  <span>
+                    <OrderedListOutlined /> Summary
+                  </span>
+                }
+                key="2"
+              >
+                <SummaryTab summary={summary} />
               </TabPane>
             </Tabs>
           </Content>

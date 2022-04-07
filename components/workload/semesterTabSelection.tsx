@@ -25,10 +25,10 @@ export function SemesterTabSelection({
         defaultValue={!selectedSemester ? currentSemester : selectedSemester}
       >
         <Option key={"first"} value={"First Semester"}>
-          First Semester
+          First
         </Option>
         <Option key={"second"} value={"Second Semester"}>
-          Second Semester
+          Second
         </Option>
         <Option key={"summer"} value={"Summer"}>
           Mid Year

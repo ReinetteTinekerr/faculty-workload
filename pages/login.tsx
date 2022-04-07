@@ -2,7 +2,7 @@ import Head from "next/head";
 import { Layout, Row, Col } from "antd";
 import { Typography } from "antd";
 import { LoginForm } from "components/loginForm";
-import { login } from "../firebase/firebaseAuthHelper";
+import { login } from "../firebase/firebaseAuthService";
 import { useAuthSession } from "utils/hooks";
 import WorkloadLayout from "components/layout/WorkloadLayout";
 import { NextPage } from "next";
@@ -23,8 +23,6 @@ const Login: NextPage = () => {
         />
         <link rel="icon" href="/isu-logo.ico" />
       </Head>
-      {/* <Layout style={{ minHeight: "100vh" }}> */}
-      {/* <WorkloadHeader user={null} /> */}
 
       <WorkloadLayout headerTitle="Sign In | Faculty Workload">
         <Content

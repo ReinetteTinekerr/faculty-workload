@@ -26,12 +26,12 @@ import { convertFileObjToDataUrl } from "utils/utils";
 import {
   getImageURL,
   uploadSignature,
-} from "../../../firebase/firestorageUtils";
+} from "../../../firebase/firestorageService";
 import {
   getUserProfileFromCacheElseServer,
   updateUserProfile,
   updateUserSignature,
-} from "../../../firebase/firestoreQueries";
+} from "../../../firebase/firestoreService";
 
 const { Option } = Select;
 

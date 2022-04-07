@@ -1,13 +1,12 @@
 import { Form, Input, Button, Row, Col, message } from "antd";
 import { UserOutlined, LockOutlined, LoadingOutlined } from "@ant-design/icons";
-import Link from "next/link";
 import { useState } from "react";
 
 export function LoginForm(props: any) {
   const [loading, setLoading] = useState(false);
   return (
     <Form
-      name="normal_login"
+      name="login"
       className="login-form"
       initialValues={{
         remember: true,
@@ -47,7 +46,7 @@ export function LoginForm(props: any) {
           },
         ]}
       >
-        <Input prefix={<UserOutlined />} placeholder="Email" />
+        <Input size="large" prefix={<UserOutlined />} placeholder="Email" />
       </Form.Item>
       <Form.Item
         name="password"
@@ -58,7 +57,11 @@ export function LoginForm(props: any) {
           },
         ]}
       >
-        <Input.Password prefix={<LockOutlined />} placeholder="Password" />
+        <Input.Password
+          size="large"
+          prefix={<LockOutlined />}
+          placeholder="Password"
+        />
       </Form.Item>
       <Row justify="center">
         {/* <Col>
@@ -69,10 +72,11 @@ export function LoginForm(props: any) {
           </Form.Item>
         </Col> */}
         <Col>
-          <Form.Item>
+          <Form.Item name="submit">
             <Button
               disabled={loading}
               type="primary"
+              shape="round"
               htmlType="submit"
               className="login-form-button"
             >

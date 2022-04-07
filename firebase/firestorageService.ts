@@ -4,8 +4,8 @@ import {
   uploadString,
   uploadBytes,
 } from "firebase/storage";
-import { storage } from "../firebase/clientApp";
 //test develop branch
+import { storage } from "./clientApp";
 
 export async function uploadSignature(imageDataUrl: string, uid: string) {
   const userSignatureRef = ref(storage, `signatures/${uid}/signature`);
